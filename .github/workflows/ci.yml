@@ -2,11 +2,9 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
-      - bugfix      # 普通提交，编译产物，但不发布
     tags:
-      - "*"       # 只有 tag 推送会额外发布
+      - "*"
+
   workflow_dispatch:
     inputs:
       spksrc:
@@ -14,7 +12,7 @@ on:
         required: false
         type: string
       version:
-        description: "format %y.%-m.$i or auto"
+        description: "version tag"
         required: false
         type: string
       prerelease:
@@ -28,12 +26,12 @@ jobs:
     strategy:
       matrix:
         target:
-          - "x64-7.0"
-          - "aarch64-7.0"
+        - "x64-7.0"
+        - "aarch64-7.0"
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@main
 
       - name: Init Env
         run: |
@@ -73,6 +71,8 @@ jobs:
           ROOT_PATH="${{ github.workspace }}"
           docker run -v ${ROOT_PATH}/spksrc:/spksrc -v ${ROOT_PATH}/rr-manager:/spksrc/spk/rr-manager -w /spksrc/spk/rr-manager ghcr.io/synocommunity/spksrc make arch-${{ matrix.target }}
 
+          docker run -v ${ROOT_PATH}/spksrc:/spksrc -w /spksrc/spk/python311 ghcr.io/synocommunity/spksrc make arch-${{ matrix.target }}
+
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -85,4 +85,13 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
+            spksrc/packages/*.spk
+
+      - name: Release
+        if: env.VERSION != ''
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ env.VERSION }}
+          prerelease: ${{ inputs.prerelease }}
+          artifacts: |
             spksrc/packages/*.spk
