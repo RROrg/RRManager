@@ -27,7 +27,9 @@ jobs:
       matrix:
         target:
         - "x64-7.0"
+        - "x64-7.2"
         - "aarch64-7.0"
+        - "aarch64-7.2"
 
     steps:
       - name: Checkout
