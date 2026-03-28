@@ -81,12 +81,10 @@ export default Ext.define('SYNOCOMMUNITY.RRManager.Setting.Main', {
   doApply: async function () {
     this.setStatusBusy();
     try {
-      (async () => {
-        await this.setConf();
-        await this.updateAllForm();
-        this.clearStatusBusy();
-        this.setStatusOK();
-      })();
+      await this.setConf();
+      await this.updateAllForm();
+      this.clearStatusBusy();
+      this.setStatusOK();
     } catch (e) {
       SYNO.Debug(e);
       this.clearStatusBusy();
@@ -111,7 +109,8 @@ export default Ext.define('SYNOCOMMUNITY.RRManager.Setting.Main', {
   getConf: function () {
     var rrConfigJson = localStorage.getItem('rrConfig');
     var rrConfig = JSON.parse(rrConfigJson);
-    var rrManagerConfig = this.appWin.appInstance.initialConfig.taskButton.jsConfig;
+    var appConfig = this.appWin.appInstance.initialConfig || {};
+    var rrManagerConfig = appConfig.taskButton?.jsConfig || appConfig;
 
     return {
       user_config: rrConfig?.user_config,

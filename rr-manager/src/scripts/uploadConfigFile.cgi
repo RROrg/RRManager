@@ -76,14 +76,17 @@ if __name__ == "__main__":
                       call_mount_loader_script("unmountLoaderDisk")
                       response["success"] = True
                       response["message"] = message
-                    if data.get('checkRRForUpdates'):
+                    if "enableTTYDTab" in data or "checkRRForUpdates" in data:
                       # read the config file
                       config_file = "/usr/syno/synoman/webman/3rdparty/rr-manager/config"
                       with open(config_file, "r") as f:
                           config_data = f.read()
                       config_data = json.loads(config_data)
-                      config_data["rr-manager.js"]["SYNOCOMMUNITY.RRManager.AppInstance"]["enableTTYDTab"] = data["enableTTYDTab"]
-                      config_data["rr-manager.js"]["SYNOCOMMUNITY.RRManager.AppInstance"]["checkRRForUpdates"] = data["checkRRForUpdates"]
+                      app_instance_config = config_data["rr-manager.js"]["SYNOCOMMUNITY.RRManager.AppInstance"]
+                      if "enableTTYDTab" in data:
+                          app_instance_config["enableTTYDTab"] = data["enableTTYDTab"]
+                      if "checkRRForUpdates" in data:
+                          app_instance_config["checkRRForUpdates"] = data["checkRRForUpdates"]
                       rr_manager_file = "/tmp/rrconfig"
                       with open(rr_manager_file, "w") as f:
                           f.write(json.dumps(config_data, indent=4))
@@ -107,4 +110,3 @@ if __name__ == "__main__":
 
     print("Content-type: application/json\n")
     print(json.dumps(response, indent=4))
-

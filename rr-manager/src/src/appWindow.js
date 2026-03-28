@@ -22,7 +22,8 @@ export default
         },
         fillConfig: function (e) {
             //get app setting from src\app\config
-            const jsConfig =e.appInstance.initialConfig?.taskButton?.jsConfig;
+            const initialConfig = e.appInstance?.initialConfig || {};
+            const jsConfig = initialConfig?.taskButton?.jsConfig || initialConfig;
             //check if the console tab is enabled
             const showConsoleTab = jsConfig?.enableTTYDTab;
             let tabs = this.getListTabs(showConsoleTab);

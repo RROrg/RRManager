@@ -267,7 +267,7 @@ export default SYNOCOMMUNITY.RRManager.SynoApiProvider = {
             var response = Ext.decode(result?.responseText);
             reject(response?.error);
           } else {
-            reject('Failed with status: ' + response?.status);
+            reject('Failed with status: ' + result?.status);
           }
         },
       });

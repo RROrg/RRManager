@@ -143,31 +143,32 @@ export default Ext.define('SYNOCOMMUNITY.RRManager.Overview.Main', {
     var self = this;
     const rrConfig = await this._getRrConfig();
     const config = rrConfig.rr_manager_config;
-    self.apiProvider
-      .getSharesList()
-      .then(x => {
-        var shareName = `/${config['SHARE_NAME']}`;
-        var sharesList = x.shares;
-        localStorage.setItem('sharesList', JSON.stringify(sharesList));
-        var downloadsShareMetadata = sharesList.find(
-          x => x.path.toLowerCase() === shareName.toLowerCase()
+    try {
+      const x = await self.apiProvider.getSharesList();
+      var shareName = `/${config['SHARE_NAME']}`;
+      var sharesList = x.shares;
+      localStorage.setItem('sharesList', JSON.stringify(sharesList));
+      var downloadsShareMetadata = sharesList.find(
+        x => x.path.toLowerCase() === shareName.toLowerCase()
+      );
+      if (!downloadsShareMetadata) {
+        var msg = this.formatString(
+          this.helper.V('ui', 'share_notfound_msg'),
+          config['SHARE_NAME']
         );
-        if (!downloadsShareMetadata) {
-          var msg = this.formatString(
-            this.helper.V('ui', 'share_notfound_msg'),
-            config['SHARE_NAME']
-          );
-          self.appWin.setStatusBusy({ text: this.helper.V('ui', 'checking_dependencies_loader') });
-          self.showMsg(msg);
-          return;
-        }
-        if (callback) {
-          callback();
-        }
-      })
-      .catch(err => {
-        self.showMsg(this.helper.V('ui', 'error_checking_share'));
-      });
+        self.appWin.clearStatusBusy();
+        self.showMsg(msg);
+        return false;
+      }
+      if (callback) {
+        callback();
+      }
+      return true;
+    } catch (err) {
+      self.appWin.clearStatusBusy();
+      self.showMsg(this.helper.V('ui', 'error_checking_share'));
+      return false;
+    }
   },
   showPasswordConfirmDialog: function (taskName) {
     return new Promise((resolve, reject) => {
@@ -196,6 +197,9 @@ export default Ext.define('SYNOCOMMUNITY.RRManager.Overview.Main', {
     if (this.loaded) {
       return;
     }
+    const appConfig =
+      self.initialConfig?.appWin?.initialConfig?.appInstance?.initialConfig || {};
+    const rrManagerConfig = appConfig?.taskButton?.jsConfig || appConfig;
     //TODO: implement localization
     self.appWin.setStatusBusy({ text: 'Loading system info...' });
     (async () => {
@@ -204,7 +208,7 @@ export default Ext.define('SYNOCOMMUNITY.RRManager.Overview.Main', {
         const [systemInfo, packages, rrCheckVersion] = await Promise.all([
           self.apiProvider.getSytemInfo(),
           self.apiProvider.getPackagesList(),
-          self.initialConfig.appWin.initialConfig.appInstance.taskButton.jsConfig.checkRRForUpdates
+          rrManagerConfig?.checkRRForUpdates
             ? self.apiProvider.checkRRVersion()
             : null,
         ]);
@@ -212,7 +216,9 @@ export default Ext.define('SYNOCOMMUNITY.RRManager.Overview.Main', {
         var isModernDSM = systemInfo.version_string.includes('7.2.2');
         self.apiProvider.setIsModernDSM(isModernDSM);
 
-        await self.__checkDownloadFolder();
+        if (!(await self.__checkDownloadFolder())) {
+          return;
+        }
         if (systemInfo && packages) {
           self.rrCheckVersion = rrCheckVersion;
           //TODO: implement localization

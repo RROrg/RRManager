@@ -134,7 +134,7 @@ Ext.define('SYNOCOMMUNITY.RRManager.Widget', {
     }
   },
   getPackagesList: function () {
-    that = this;
+    var that = this;
     return new Promise((resolve, reject) => {
       let params = {
         additional: [
