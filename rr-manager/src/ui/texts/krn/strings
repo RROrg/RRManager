@@ -1,0 +1,3 @@
+[app]
+displayname = "RR Manager"
+description = "DSM에서 RR 부트로더 구성을 관리하고 RR을 직접 업데이트합니다."

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html class="rrmHtml" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RR Manager Modules</title>
+    <link rel="stylesheet" href="/webman/3rdparty/rr-manager/style.css">
+</head>
+<body class="rrm subPage" data-page="modules">
+    <main class="panel panelSolo">
+        <div class="panelHead">
+            <div>
+                <p class="sectionEyebrow" data-i18n="modules.eyebrow">Kernel Extensions</p>
+                <h2 data-i18n="nav.modules">Modules</h2>
+            </div>
+            <div class="actionRow compact">
+                <button id="refreshItems" type="button" data-i18n="common.refresh">Refresh</button>
+                <button id="saveItems" type="button" data-i18n="modules.save">Save Modules</button>
+            </div>
+        </div>
+        <label class="field">
+            <span data-i18n="modules.filter">Filter modules</span>
+            <input id="searchInput" type="text" placeholder="Search by module name" data-i18n-placeholder="modules.searchPlaceholder">
+        </label>
+        <div class="tableWrap">
+            <table class="listTable narrowTable">
+                <colgroup>
+                    <col class="colName">
+                    <col class="colDescription">
+                    <col class="colEnable">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th class="colName" data-i18n="table.name">Name</th>
+                        <th data-i18n="table.description">Description</th>
+                        <th data-i18n="table.enable">Enable</th>
+                    </tr>
+                </thead>
+                <tbody id="itemsBody"></tbody>
+            </table>
+        </div>
+    </main>
+    <div class="toast" id="toast" hidden></div>
+    <script src="/webman/3rdparty/rr-manager/app.js"></script>
+</body>
+</html>

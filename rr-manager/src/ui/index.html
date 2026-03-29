@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html class="rrmHtml" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RR Manager</title>
+    <link rel="stylesheet" href="/webman/3rdparty/rr-manager/style.css">
+</head>
+<body class="rrm shellPage" data-page="shell">
+    <div class="shellFrame">
+        <header class="hero shellHero">
+            <div class="heroMain">
+                <div class="heroCopy">
+                    <p class="eyebrow" data-i18n="shell.eyebrow">DSM Bootloader Control</p>
+                    <h1 data-i18n="common.appName">RR Manager</h1>
+                    <p class="lead" data-i18n="shell.lead">Bootloader manager for RR.</p>
+                </div>
+                <div class="heroLogoCard" aria-label="RR Logo" data-i18n-aria-label="shell.logoAria">
+                    <img class="heroLogoImage" src="/webman/3rdparty/rr-manager/images/rr-logo.png" alt="RR Logo" data-i18n-alt="shell.logoAlt">
+                </div>
+            </div>
+        </header>
+
+        <nav class="subnav" id="subnav">
+            <button class="active" data-page-target="overview" type="button" data-i18n="nav.overview">Overview</button>
+            <button data-page-target="config" type="button" data-i18n="nav.config">Config</button>
+            <button data-page-target="addons" type="button" data-i18n="nav.addons">Addons</button>
+            <button data-page-target="modules" type="button" data-i18n="nav.modules">Modules</button>
+            <button data-page-target="update" type="button" data-i18n="nav.update">Update</button>
+            <div class="subnavSpacer" aria-hidden="true"></div>
+            <div class="langSwitch" aria-label="Language" data-i18n-aria-label="shell.languageAria">
+                <select id="localeSelect" class="langSelect" aria-label="Language" data-i18n-aria-label="shell.languageAria">
+                    <option value="en-US">English (US)</option>
+                    <option value="ar-SA">العربية</option>
+                    <option value="de-DE">Deutsch</option>
+                    <option value="es-ES">Español</option>
+                    <option value="fr-FR">Français</option>
+                    <option value="ja-JP">日本語</option>
+                    <option value="ko-KR">한국어</option>
+                    <option value="ru-RU">Русский</option>
+                    <option value="th-TH">ไทย</option>
+                    <option value="tr-TR">Türkçe</option>
+                    <option value="uk-UA">Українська</option>
+                    <option value="vi-VN">Tiếng Việt</option>
+                    <option value="zh-CN">简体中文</option>
+                    <option value="zh-HK">繁體中文（香港）</option>
+                    <option value="zh-TW">繁體中文（台灣）</option>
+                </select>
+            </div>
+        </nav>
+
+        <section class="iframeWrap">
+            <iframe id="contentFrame" title="RR Manager Content" src="/webman/3rdparty/rr-manager/overview.html" data-i18n-title="shell.contentTitle"></iframe>
+        </section>
+    </div>
+    <script src="/webman/3rdparty/rr-manager/app.js"></script>
+</body>
+</html>

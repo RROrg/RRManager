@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html class="rrmHtml" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RR Manager Config</title>
+    <link rel="stylesheet" href="/webman/3rdparty/rr-manager/style.css">
+</head>
+<body class="rrm subPage" data-page="config">
+    <main class="panel panelSolo">
+        <div class="panelHead">
+            <div>
+                <p class="sectionEyebrow" data-i18n="config.eyebrow">Direct Editing</p>
+                <h2 data-i18n="config.title">user-config.yml</h2>
+            </div>
+        </div>
+        <div class="editorMeta" id="editorMeta" data-i18n="config.preparing">Preparing file reader...</div>
+        <textarea id="editor" spellcheck="false"></textarea>
+        <div class="actionRow">
+            <button id="reloadFile" type="button" data-i18n="common.reload">Reload</button>
+            <button id="saveFile" type="button" data-i18n="config.save">Save To Bootloader</button>
+        </div>
+    </main>
+    <div class="toast" id="toast" hidden></div>
+    <script src="/webman/3rdparty/rr-manager/app.js"></script>
+</body>
+</html>

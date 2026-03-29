@@ -1,0 +1,3 @@
+[app]
+displayname = "RR Manager"
+description = "DSM から RR ブートローダー設定を管理し、RR を直接更新します。"

@@ -1,0 +1,23 @@
+{
+    "rr-manager.js": {
+        "RROrg.RRManager.Application": {
+            "type": "app",
+            "title": "app:displayname",
+            "version": "1.0",
+            "icon": "images/rr-manager-{0}.png",
+            "texts": "texts",
+            "allowMultiInstance": false,
+            "allUsers": false,
+            "appWindow": "RROrg.RRManager.AppWindow",
+            "depend": [
+                "RROrg.RRManager.AppWindow"
+            ]
+        },
+        "RROrg.RRManager.AppWindow": {
+            "type": "lib",
+            "title": "app:displayname",
+            "icon": "images/rr-manager-{0}.png",
+            "texts": "texts"
+        }
+    }
+}

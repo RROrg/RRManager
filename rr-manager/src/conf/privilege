@@ -1,0 +1,8 @@
+{
+  "defaults": {
+    "run-as": "package"
+  },
+  "join-groupname": "http",
+  "username": "sc-rr-manager",
+  "groupname": "synocommunity"
+}

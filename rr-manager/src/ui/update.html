@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html class="rrmHtml" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RR Manager Update</title>
+    <link rel="stylesheet" href="/webman/3rdparty/rr-manager/style.css">
+</head>
+<body class="rrm subPage" data-page="update">
+    <main class="grid embeddedGrid">
+        <section class="panel">
+            <div class="panelHead">
+                <div>
+                    <p class="sectionEyebrow" data-i18n="update.stateEyebrow">Update State</p>
+                    <h2 data-i18n="update.overviewTitle">Update Overview</h2>
+                </div>
+                <button id="refreshOverview" type="button" data-i18n="common.refresh">Refresh</button>
+            </div>
+            <div class="heroStatus inlineHeroStatus" id="heroStatus" data-i18n="common.loading">Loading...</div>
+            <div class="stats" id="overviewStats"></div>
+        </section>
+
+        <section class="panel">
+            <div class="panelHead">
+                <div>
+                    <p class="sectionEyebrow" data-i18n="update.releaseEyebrow">Release Flow</p>
+                    <h2 data-i18n="update.upgradeTitle">Upgrade RR</h2>
+                </div>
+                <button id="checkRelease" type="button" data-i18n="update.checkRelease">Check Latest Release</button>
+            </div>
+            <div class="releaseBox" id="releaseBox">
+                <p data-i18n="update.noReleaseData">No release data.</p>
+            </div>
+            <div class="actionRow">
+                <button id="startOnlineUpdate" type="button" disabled data-i18n="update.upgradeOnline">Upgrade Online</button>
+            </div>
+            <label class="field">
+                <span data-i18n="update.localPath">Local update zip path</span>
+                <input id="localArchivePath" type="text" placeholder="/volume1/public/updateall-26.3.3.zip" data-i18n-placeholder="update.localPathPlaceholder">
+            </label>
+            <div class="actionRow">
+                <button id="startLocalUpdate" type="button" data-i18n="update.upgradeLocal">Upgrade From Local Path</button>
+            </div>
+        </section>
+
+        <section class="panel wide">
+            <div class="panelHead">
+                <div>
+                    <p class="sectionEyebrow" data-i18n="update.logEyebrow">Activity Feed</p>
+                    <h2 data-i18n="update.logTitle">Job Log</h2>
+                </div>
+                <button id="refreshLog" type="button" data-i18n="update.refreshLog">Refresh Log</button>
+            </div>
+            <pre id="logView" data-i18n="update.noLog">No log output yet.</pre>
+        </section>
+    </main>
+    <div class="toast" id="toast" hidden></div>
+    <script src="/webman/3rdparty/rr-manager/app.js"></script>
+</body>
+</html>

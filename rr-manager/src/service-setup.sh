@@ -1,54 +1,43 @@
-PYTHON_DIR="/var/packages/python311/target/bin"
-PACKAGE="rr-manager"
-PATH="${SYNOPKG_PKGDEST}/env/bin:${SYNOPKG_PKGDEST}/bin:${SYNOPKG_PKGDEST}/usr/bin:${PYTHON_DIR}:${PATH}"
-CFG_FILE="${SYNOPKG_PKGDEST}/app/config.txt"
+#!/bin/sh
 
-service_postinst ()
-{
-    separator="===================================================="
+PACKAGE_ROOT="${SYNOPKG_PKGDEST}"
+UI_DIR="${PACKAGE_ROOT}/app"
 
-    echo ${separator}
-    install_python_virtualenv
-
-    echo ${separator}
-    install_python_wheels
-
-    echo ${separator}
-    echo "Install packages to the app/libs folder"
-    ${SYNOPKG_PKGDEST}/env/bin/pip install --target ${SYNOPKG_PKGDEST}/app/scripts/libs/ -r ${SYNOPKG_PKGDEST}/share/wheelhouse/requirements.txt
-
-    echo ${separator}
-     if [ "${SYNOPKG_PKG_STATUS}" == "INSTALL" ]; then
-        echo "Populate config.txt"
-        sed -i -e "s|@this_is_upload_realpath@|${wizard_download_dir}|g" \
-            -e "s|@this_is_sharename@|${wizard_download_share}|g" \
-        "${CFG_FILE}"
-    fi
+register_indexes() {
+    pkgindexer_add "${UI_DIR}/index.conf"
+    pkgindexer_add "${UI_DIR}/helptoc.conf"
 }
 
-service_preupgrade ()
-{
- # Save configuration files
-    rm -fr ${SYNOPKG_TEMP_UPGRADE_FOLDER}/${PACKAGE}
-    mkdir -p ${SYNOPKG_TEMP_UPGRADE_FOLDER}/${PACKAGE}
-
-      # Save package config
-    mv "${CFG_FILE}" "${SYNOPKG_TEMP_UPGRADE_FOLDER}/${PACKAGE}/config.txt"
+unregister_indexes() {
+    pkgindexer_del "${UI_DIR}/helptoc.conf"
+    pkgindexer_del "${UI_DIR}/index.conf"
 }
 
-service_postupgrade ()
-{
-    rm -f "${CFG_FILE}"
-    # Restore package config
-    mv "${SYNOPKG_TEMP_UPGRADE_FOLDER}/${PACKAGE}/config.txt" "${CFG_FILE}"
-    touch /tmp/rr_manager_installed
-    rm -fr ${SYNOPKG_TEMP_UPGRADE_FOLDER}/${PACKAGE}
+fix_permissions() {
+    chmod 0755 "${UI_DIR}/scripts/api.cgi"
+    chmod 0755 "${PACKAGE_ROOT}/bin/rr-manager-lib.sh" "${PACKAGE_ROOT}/bin/rr-manager-job.sh"
+    chmod 0755 "${PACKAGE_ROOT}/var"
 }
 
-# Uninstall the package does not remove the tasks from the scheduler due to lack of permissions
-service_postuninst ()
-{
-    echo "DELETE FROM task WHERE task_name='RunRrUpdate'" | sqlite3 /usr/syno/etc/esynoscheduler/esynoscheduler.db
-    echo "DELETE FROM task WHERE task_name='ApplyRRConfig'" | sqlite3 /usr/syno/etc/esynoscheduler/esynoscheduler.db
-    echo "DELETE FROM task WHERE task_name='SetRootPrivsToRrManager'" | sqlite3 /usr/syno/etc/esynoscheduler/esynoscheduler.db
+cleanup_legacy_ui() {
+    rm -f "${UI_DIR}/index.cgi" "${UI_DIR}/api.cgi"
+    rm -rf "${PACKAGE_ROOT}/ui"
+}
+
+service_postinst() {
+    mkdir -p "${PACKAGE_ROOT}/var"
+    cleanup_legacy_ui
+    fix_permissions
+    register_indexes
+}
+
+service_postupgrade() {
+    mkdir -p "${PACKAGE_ROOT}/var"
+    cleanup_legacy_ui
+    fix_permissions
+    register_indexes
+}
+
+service_postuninst() {
+    unregister_indexes
 }

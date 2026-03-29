@@ -1,0 +1,3 @@
+[app]
+displayname = "RR Manager"
+description = "Verwalten Sie die RR-Bootloader-Konfiguration und aktualisieren Sie RR direkt aus DSM."

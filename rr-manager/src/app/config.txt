@@ -1,4 +1,0 @@
-UPLOAD_DIR_PATH=@this_is_upload_realpath@
-SHARE_NAME=@this_is_sharename@
-RR_TMP_DIR=tmp
-RR_UPDATE_PROGRESS_FILE=rr_update_progress

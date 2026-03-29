@@ -1,0 +1,3 @@
+[app]
+displayname = "RR Manager"
+description = "إدارة إعدادات محمل الإقلاع RR وتحديث RR مباشرة من DSM."

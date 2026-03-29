@@ -1,89 +1,83 @@
 SPK_NAME = rr-manager
-SPK_VERS = 3.0
-SPK_REV = 32
+SPK_VERS = 4.0
+SPK_REV = 1
 SPK_ICON = src/rr-manager.png
 
-DSM_UI_DIR = app
-DSM_UI_CONFIG = src/app/config
-DSM_APP_NAME = SYNOCOMMUNITY.RRManager.AppInstance
+override ARCH = noarch
 
-PYTHON_PACKAGE = python311
-SPK_DEPENDS = "python311>=3.11.5-8"
-
-MAINTAINER = T-REX-XP
-
-DESCRIPTION = RR Manager is a Redpill Recovery DSM application aimed to provide the ability to configure/update RR without booting to RR recovery. This package is for experienced users.
-STARTABLE = no
+MAINTAINER = RROrg
+DESCRIPTION = Manage RR bootloader configuration and RR upgrades directly from DSM.
 DISPLAY_NAME = RR Manager
+HOMEPAGE = https://github.com/RROrg/rr
+LICENSE = GPLv3
 
-HOMEPAGE = https://github.com/T-REX-XP/RRManager
+DSM_UI_DIR = app
+DSM_UI_CONFIG = src/ui/config
+DSM_APP_NAME = RROrg.RRManager.Application
 
 CONF_DIR = src/conf
 SYSTEM_GROUP = http
-
-SERVICE_USER   = auto
-SERVICE_SETUP  = src/service-setup.sh
-SSS_SCRIPT = src/dsm-control.sh
+SERVICE_SETUP = src/service-setup.sh
+SSS_SCRIPT = src/start-stop-status.sh
+STARTABLE = no
 COPY_TARGET = nop
-POST_STRIP_TARGET = rr-manager_extra_install
-
+POST_STRIP_TARGET = rr_manager_extra_install
 
 include ../../mk/spksrc.common.mk
-include ../../mk/spksrc.directories.mk
-SERVICE_WIZARD_SHARE = wizard_download_dir
-WIZARDS_DIR = $(WORK_DIR)/generated-wizards
-WIZARDS = install_uifile upgrade_uifile
-SUPPORTED_LANGUAGES = fre
-
-wizards: generated-wizards
 include ../../mk/spksrc.spk.mk
 
-.PHONY: generated-wizards
-generated-wizards:
-	@mkdir -p $(WIZARDS_DIR)
-	@for template in $(WIZARDS); do \
-		for suffix in '' $(patsubst %,_%,$(SUPPORTED_LANGUAGES)) ; do \
-			{\
-			  	echo "#!/bin/sh";\
-				echo "";\
-				cat src/wizard_templates/uifile_vars$${suffix} | sed -e 's/\\/\\\\/g' -e 's/\"/\\\"/g' -e 's/^\([^=]*\)=\\"\(.*\)\\"$$/\1="\2"/g';\
-				echo "";\
-				cat "$(SPKSRC_MK)spksrc.service.installer.functions";\
-				echo "";\
-				cat src/wizard_templates/shared_uifile_setup.sh;\
-				echo "";\
-				cat src/wizard_templates/$${template}.sh;\
-			}>$(WIZARDS_DIR)/$${template}$${suffix}.sh;\
-		done;\
+.PHONY: rr_manager_extra_install
+rr_manager_extra_install:
+	install -m 755 -d $(STAGING_DIR)/app
+	for lang in enu ara ger spn fre jpn krn rus tha trk ukr vit chs cht en_US ar_SA de_DE es_ES fr_FR ja_JP ko_KR ru_RU th_TH tr_TR uk_UA vi_VN zh_CN zh_HK zh_TW; do \
+		install -m 755 -d $(STAGING_DIR)/app/help/$$lang; \
+		install -m 755 -d $(STAGING_DIR)/app/texts/$$lang; \
 	done
+	install -m 755 -d $(STAGING_DIR)/app/images
+	install -m 755 -d $(STAGING_DIR)/bin
+	install -m 755 -d $(STAGING_DIR)/var
 
-.PHONY: rr-manager_extra_install
-rr-manager_extra_install:
-	install -m 755 -d $(STAGING_DIR)/share $(STAGING_DIR)/var
-	install -m 755 -d $(STAGING_DIR)/share/wheelhouse/
-	install -m 644 src/requirements.txt $(STAGING_DIR)/share/wheelhouse/requirements.txt
-
-	install -m 755 -d $(STAGING_DIR)/app/
-	install -m 755 -d $(STAGING_DIR)/app/libs/	
-	install -m 755 -d $(STAGING_DIR)/app/scripts/	
-	install -m 755 -d $(STAGING_DIR)/app/images/
-	install -m 755 -d $(STAGING_DIR)/app/images/1x
-		
-	install -m 755 src/scripts/* $(STAGING_DIR)/app/scripts/
-	install -m 644 src/app/config $(STAGING_DIR)/app/
-	install -m 644 src/app/*.* $(STAGING_DIR)/app/
-	install -m 755 src/images/1x/* $(STAGING_DIR)/app/images/1x/
-	
-	install -m 755 src/app/tasks.sql $(STAGING_DIR)/app/tasks.sql
-
-	
-	install -m 755 -d $(STAGING_DIR)/app/help
-	for language in enu fre; do \
-		install -m 755 -d $(STAGING_DIR)/app/help/$${language}; \
-		install -m 644 src/app/help/$${language}/simpleapp_index.html $(STAGING_DIR)/app/help/$${language}/simpleapp_index.html; \
+	install -m 644 src/ui/config $(STAGING_DIR)/app/config
+	install -m 644 src/ui/application.cfg $(STAGING_DIR)/app/application.cfg
+	install -m 644 src/ui/index.conf $(STAGING_DIR)/app/index.conf
+	install -m 644 src/ui/helptoc.conf $(STAGING_DIR)/app/helptoc.conf
+	install -m 755 -d $(STAGING_DIR)/app/scripts
+	install -m 644 src/ui/style.css $(STAGING_DIR)/app/style.css
+	install -m 644 src/ui/app.js $(STAGING_DIR)/app/app.js
+	install -m 644 src/ui/rr-manager.js $(STAGING_DIR)/app/rr-manager.js
+	install -m 644 src/ui/index.html $(STAGING_DIR)/app/index.html
+	install -m 644 src/ui/overview.html $(STAGING_DIR)/app/overview.html
+	install -m 644 src/ui/update.html $(STAGING_DIR)/app/update.html
+	install -m 644 src/ui/addons.html $(STAGING_DIR)/app/addons.html
+	install -m 644 src/ui/modules.html $(STAGING_DIR)/app/modules.html
+	install -m 644 src/ui/config.html $(STAGING_DIR)/app/config.html
+	install -m 755 src/ui/scripts/api.cgi $(STAGING_DIR)/app/scripts/api.cgi
+	for lang in enu en_US; do \
+		install -m 644 src/ui/help/enu/index.html $(STAGING_DIR)/app/help/$$lang/index.html; \
+		install -m 644 src/ui/texts/enu/strings $(STAGING_DIR)/app/texts/$$lang/strings; \
+		install -m 644 src/ui/texts/enu/ui.json $(STAGING_DIR)/app/texts/$$lang/ui.json; \
 	done
-	install -m 755 -d $(STAGING_DIR)/app/texts
-	for language in enu rus chs cht krn; do \
-		install -m 755 -d $(STAGING_DIR)/app/texts/$${language}; \
-		install -m 644 src/app/texts/$${language}/strings $(STAGING_DIR)/app/texts/$${language}/strings; \
+	for item in "ara:ar_SA" "ger:de_DE" "spn:es_ES" "fre:fr_FR" "jpn:ja_JP" "krn:ko_KR" "rus:ru_RU" "tha:th_TH" "trk:tr_TR" "ukr:uk_UA" "vit:vi_VN"; do \
+		short_lang=$${item%%:*}; \
+		full_lang=$${item##*:}; \
+		install -m 644 src/ui/help/enu/index.html $(STAGING_DIR)/app/help/$$short_lang/index.html; \
+		install -m 644 src/ui/texts/$$short_lang/strings $(STAGING_DIR)/app/texts/$$short_lang/strings; \
+		install -m 644 src/ui/texts/$$short_lang/ui.json $(STAGING_DIR)/app/texts/$$short_lang/ui.json; \
+		install -m 644 src/ui/help/enu/index.html $(STAGING_DIR)/app/help/$$full_lang/index.html; \
+		install -m 644 src/ui/texts/$$short_lang/strings $(STAGING_DIR)/app/texts/$$full_lang/strings; \
+		install -m 644 src/ui/texts/$$short_lang/ui.json $(STAGING_DIR)/app/texts/$$full_lang/ui.json; \
 	done
+	for lang in chs zh_CN; do \
+		install -m 644 src/ui/help/chs/index.html $(STAGING_DIR)/app/help/$$lang/index.html; \
+		install -m 644 src/ui/texts/chs/strings $(STAGING_DIR)/app/texts/$$lang/strings; \
+		install -m 644 src/ui/texts/chs/ui.json $(STAGING_DIR)/app/texts/$$lang/ui.json; \
+	done
+	for lang in cht zh_HK zh_TW; do \
+		install -m 644 src/ui/help/cht/index.html $(STAGING_DIR)/app/help/$$lang/index.html; \
+		install -m 644 src/ui/texts/cht/strings $(STAGING_DIR)/app/texts/$$lang/strings; \
+		install -m 644 src/ui/texts/cht/ui.json $(STAGING_DIR)/app/texts/$$lang/ui.json; \
+	done
+	install -m 644 src/ui/images/*.png $(STAGING_DIR)/app/images/
+
+	install -m 755 src/bin/rr-manager-lib.sh $(STAGING_DIR)/bin/rr-manager-lib.sh
+	install -m 755 src/bin/rr-manager-job.sh $(STAGING_DIR)/bin/rr-manager-job.sh

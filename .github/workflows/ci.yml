@@ -26,10 +26,7 @@ jobs:
     strategy:
       matrix:
         target:
-        - "x64-7.0"
-        - "x64-7.2"
-        - "aarch64-7.0"
-        - "aarch64-7.2"
+        - "noarch-7.0"
 
     steps:
       - name: Checkout
@@ -39,17 +36,6 @@ jobs:
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "16"
-
-      - name: Install Dependencies
-        run: |
-          cd rr-manager
-          npm install
-          npm run build
 
       - name: Checkout SynoCommunity Source and Docker Image
         run: |
@@ -73,10 +59,8 @@ jobs:
           ROOT_PATH="${{ github.workspace }}"
           docker run -v ${ROOT_PATH}/spksrc:/spksrc -v ${ROOT_PATH}/rr-manager:/spksrc/spk/rr-manager -w /spksrc/spk/rr-manager ghcr.io/synocommunity/spksrc make arch-${{ matrix.target }}
 
-          docker run -v ${ROOT_PATH}/spksrc:/spksrc -w /spksrc/spk/python311 ghcr.io/synocommunity/spksrc make arch-${{ matrix.target }}
-
       - name: Upload to Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: packages-${{ matrix.target }}
           path: |
@@ -90,10 +74,10 @@ jobs:
             spksrc/packages/*.spk
 
       - name: Release
-        if: env.VERSION != ''
+        if: ${{ inputs.version != '' }}
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ env.VERSION }}
+          tag: ${{ inputs.version }}
           prerelease: ${{ inputs.prerelease }}
           artifacts: |
             spksrc/packages/*.spk
