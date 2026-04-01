@@ -6,21 +6,9 @@
     <title>RR Manager Update</title>
     <link rel="stylesheet" href="/webman/3rdparty/rr-manager/style.css">
 </head>
-<body class="rrm subPage" data-page="update">
-    <main class="grid embeddedGrid">
-        <section class="panel">
-            <div class="panelHead">
-                <div>
-                    <p class="sectionEyebrow" data-i18n="update.stateEyebrow">Update State</p>
-                    <h2 data-i18n="update.overviewTitle">Update Overview</h2>
-                </div>
-                <button id="refreshOverview" type="button" data-i18n="common.refresh">Refresh</button>
-            </div>
-            <div class="heroStatus inlineHeroStatus" id="heroStatus" data-i18n="common.loading">Loading...</div>
-            <div class="stats" id="overviewStats"></div>
-        </section>
-
-        <section class="panel">
+<body class="rrm subPage compactFlowPage" data-page="update">
+    <main class="grid embeddedGrid compactFlow updateFlow">
+        <section class="panel compactPanel">
             <div class="panelHead">
                 <div>
                     <p class="sectionEyebrow" data-i18n="update.releaseEyebrow">Release Flow</p>
@@ -43,7 +31,18 @@
             </div>
         </section>
 
-        <section class="panel wide">
+        <section class="panel compactPanel">
+            <div class="panelHead">
+                <div>
+                    <p class="sectionEyebrow" data-i18n="update.stateEyebrow">Update State</p>
+                    <h2 data-i18n="update.overviewTitle">Update Overview</h2>
+                </div>
+                <button id="refreshOverview" type="button" data-i18n="common.refresh">Refresh</button>
+            </div>
+            <div class="stats" id="overviewStats"></div>
+        </section>
+
+        <section class="panel compactPanel wide">
             <div class="panelHead">
                 <div>
                     <p class="sectionEyebrow" data-i18n="update.logEyebrow">Activity Feed</p>

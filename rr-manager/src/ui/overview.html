@@ -6,9 +6,9 @@
     <title>RR Manager Overview</title>
     <link rel="stylesheet" href="/webman/3rdparty/rr-manager/style.css">
 </head>
-<body class="rrm subPage" data-page="overview">
-    <main class="grid embeddedGrid overviewGrid overviewSimpleGrid">
-        <section class="panel">
+<body class="rrm subPage compactFlowPage" data-page="overview">
+    <main class="grid embeddedGrid overviewGrid overviewSimpleGrid compactFlow">
+        <section class="panel compactPanel">
             <div class="panelHead">
                 <div>
                     <p class="sectionEyebrow" data-i18n="overview.deviceEyebrow">Device Information</p>
@@ -16,11 +16,10 @@
                 </div>
                 <button id="refreshOverview" type="button" data-i18n="common.refresh">Refresh</button>
             </div>
-            <div class="heroStatus inlineHeroStatus" id="heroStatus" data-i18n="common.loading">Loading...</div>
             <div class="stats" id="overviewStats"></div>
         </section>
 
-        <section class="panel">
+        <section class="panel compactPanel">
             <div class="panelHead">
                 <div>
                     <p class="sectionEyebrow" data-i18n="overview.bootEyebrow">Bootloader Information</p>
@@ -28,6 +27,16 @@
                 </div>
             </div>
             <div class="stats" id="bootStats"></div>
+        </section>
+
+        <section class="panel compactPanel">
+            <div class="panelHead">
+                <div>
+                    <p class="sectionEyebrow" data-i18n="overview.authEyebrow">Auth</p>
+                    <h2 data-i18n="overview.authTitle">Auth Info</h2>
+                </div>
+            </div>
+            <div class="stats" id="authStats"></div>
         </section>
     </main>
     <div class="toast" id="toast" hidden></div>

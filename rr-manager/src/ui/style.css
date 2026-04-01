@@ -63,6 +63,10 @@ body.rrm.isLoading {
     overflow: hidden;
 }
 
+body.rrm.isUpgradeBlocked {
+    overflow: hidden;
+}
+
 body.rrm::before {
     content: "";
     position: fixed;
@@ -325,6 +329,37 @@ body.rrm::before {
     line-height: 1.5;
 }
 
+.heroStatus .statusLine {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.heroStatus .statusLine:first-child {
+    padding-top: 0;
+}
+
+.heroStatus .statusLine:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.heroStatus .statusLabel {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.heroStatus .statusValue {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.35;
+    word-break: break-word;
+}
+
 .inlineHeroStatus {
     margin-bottom: 12px;
 }
@@ -336,6 +371,7 @@ body.rrm::before {
 }
 
 .panel {
+    min-width: 0;
     padding: 16px;
     border: 1px solid var(--line);
     border-radius: 20px;
@@ -348,8 +384,105 @@ body.rrm::before {
     grid-column: 1 / -1;
 }
 
+.rebootBanner {
+    position: sticky;
+    top: 6px;
+    z-index: 40;
+    flex: 0 0 auto;
+    align-self: stretch;
+    margin: 0 0 8px;
+    padding: 0;
+    border: 1px solid rgba(157, 43, 43, 0.2);
+    border-radius: 18px;
+    background:
+        radial-gradient(circle at top right, rgba(255, 214, 102, 0.34), transparent 30%),
+        linear-gradient(135deg, rgba(124, 27, 27, 0.98), rgba(191, 78, 47, 0.95));
+    box-shadow: 0 18px 42px rgba(109, 35, 24, 0.24);
+    overflow: hidden;
+}
+
+.rebootBannerBody {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    color: #fff8f1;
+}
+
+.rebootBannerBody::before {
+    content: "!";
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgba(255, 248, 241, 0.16);
+    border: 1px solid rgba(255, 248, 241, 0.22);
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.rebootBannerBadge {
+    flex: 0 0 auto;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255, 248, 241, 0.14);
+    border: 1px solid rgba(255, 248, 241, 0.22);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.rebootBannerCopy {
+    min-width: 0;
+}
+
+.rebootBannerCopy strong {
+    display: block;
+    margin: 0 0 2px;
+    font-size: 15px;
+    line-height: 1.15;
+}
+
+.rebootBannerCopy p {
+    margin: 0;
+    color: rgba(255, 248, 241, 0.94);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
 .panelSolo {
     margin: 0;
+}
+
+body.rrm[data-page='config'] {
+    height: 100%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+body.rrm[data-page='update'] {
+    height: 100%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+body.rrm[data-page='config'] .panelSolo {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+body.rrm[data-page='config'] .panelHead,
+body.rrm[data-page='config'] .actionRow {
+    flex: 0 0 auto;
 }
 
 .embeddedGrid {
@@ -358,6 +491,53 @@ body.rrm::before {
 
 .subPage {
     padding: 10px;
+}
+
+body.rrm.isUpgradeBlocked .subPage {
+    filter: blur(2px);
+    opacity: 0.28;
+    pointer-events: none;
+    user-select: none;
+}
+
+.upgradeBlockMask {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(236, 241, 234, 0.56);
+    backdrop-filter: blur(8px);
+}
+
+.upgradeBlockCard {
+    width: min(560px, 100%);
+    padding: 18px 20px;
+    border: 1px solid rgba(157, 43, 43, 0.16);
+    border-radius: 20px;
+    background:
+        radial-gradient(circle at top right, rgba(216, 154, 53, 0.14), transparent 34%),
+        linear-gradient(180deg, rgba(255, 253, 247, 0.98), rgba(251, 246, 240, 0.94));
+    box-shadow: 0 24px 64px rgba(41, 34, 26, 0.16);
+}
+
+.upgradeBlockCard h2 {
+    margin: 0;
+    font-size: 24px;
+    line-height: 1.08;
+}
+
+.upgradeBlockBody {
+    margin: 8px 0 12px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.upgradeBlockCard .heroStatus {
+    min-width: 0;
 }
 
 .panelHead {
@@ -396,6 +576,207 @@ body.rrm::before {
 
 .overviewSimpleGrid {
     grid-template-columns: 1.2fr 0.8fr;
+}
+
+.compactFlow {
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.updateFlow {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.updateFlow .panel.wide {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.updateFlow .panel.wide .panelHead {
+    flex: 0 0 auto;
+}
+
+.compactFlowPage {
+    padding: 6px;
+}
+
+.compactPanel {
+    padding: 10px 12px;
+    border-radius: 14px;
+    box-shadow: var(--shadow-soft);
+}
+
+.compactFlow .panelHead {
+    margin-bottom: 6px;
+    align-items: center;
+}
+
+.compactFlow .panelHead h2 {
+    font-size: 16px;
+}
+
+.compactFlow .sectionEyebrow {
+    margin-bottom: 1px;
+    font-size: 9px;
+}
+
+.compactFlow .heroStatus {
+    min-width: 0;
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    line-height: 1.3;
+}
+
+.compactFlow .heroStatus .statusLine {
+    padding: 5px 0;
+}
+
+.compactFlow .heroStatus .statusLabel {
+    margin-bottom: 1px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+}
+
+.compactFlow .heroStatus .statusValue {
+    font-size: 12px;
+}
+
+.compactFlow .inlineHeroStatus {
+    margin-bottom: 6px;
+}
+
+.compactFlow .stats,
+.compactFlow .releaseBox {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+}
+
+.compactFlow .stat {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    border-bottom: 1px solid var(--line);
+}
+
+.compactFlow .stat:first-child {
+    padding-top: 0;
+}
+
+.compactFlow .stat:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.compactFlow .statLabel {
+    margin-bottom: 0;
+    flex: 0 0 108px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+}
+
+.compactFlow .statValue {
+    flex: 1 1 auto;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.compactFlow .releaseBox {
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+.compactFlow .releaseBox .hint {
+    margin-top: 0;
+    padding-top: 6px;
+    border-top: 0;
+    line-height: 1.35;
+    text-align: left;
+}
+
+.compactFlow .releaseBox .hint .statValue a {
+    color: inherit;
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.compactFlow .releaseBox .hint .statValue a:hover {
+    text-decoration: underline;
+}
+
+.compactFlow .field {
+    margin-top: 6px;
+}
+
+.compactFlow .field span {
+    margin-bottom: 3px;
+    font-size: 11px;
+}
+
+.compactFlow .field input {
+    padding: 7px 9px;
+    border-radius: 10px;
+}
+
+.compactFlow .actionRow {
+    margin-top: 6px;
+}
+
+.compactFlow button {
+    padding: 6px 10px;
+    border-radius: 9px;
+    font-size: 12px;
+}
+
+.updateFlow #logView {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+@media (max-width: 960px) {
+    .compactFlow .stat {
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .compactFlow .statLabel {
+        flex-basis: 92px;
+    }
+
+    .rebootBannerBody {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .rebootBannerBadge {
+        order: 1;
+    }
+
+    .rebootBannerCopy {
+        order: 2;
+        flex: 1 1 180px;
+    }
 }
 
 .infoList {
@@ -528,8 +909,7 @@ body.rrm button:disabled {
 }
 
 .releaseBox,
-.hint,
-.editorMeta {
+.hint {
     color: var(--muted);
     line-height: 1.6;
 }
@@ -586,6 +966,67 @@ body.rrm textarea {
         linear-gradient(180deg, rgba(250, 252, 251, 0.98), rgba(255, 255, 255, 0.98));
 }
 
+body.rrm[data-page='config'] textarea {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    resize: none;
+}
+
+.editorShell {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 60px minmax(0, 1fr);
+    align-items: stretch;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    background:
+        linear-gradient(180deg, rgba(250, 252, 251, 0.98), rgba(255, 255, 255, 0.98));
+}
+
+.editorShell:focus-within {
+    border-color: rgba(31, 106, 83, 0.34);
+    box-shadow: 0 0 0 4px rgba(31, 106, 83, 0.1);
+    background: #fff;
+}
+
+.editorGutter {
+    position: relative;
+    overflow: hidden;
+    border-right: 1px solid var(--line);
+    background: rgba(31, 106, 83, 0.05);
+    color: var(--muted);
+    user-select: none;
+}
+
+.editorLineNumbers {
+    margin: 0;
+    padding: 12px 10px 12px 0;
+    text-align: right;
+    font-family: "JetBrains Mono", "Cascadia Code", "Consolas", monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre;
+    will-change: transform;
+}
+
+body.rrm[data-page='config'] .editorShell textarea {
+    min-height: 0;
+    height: 100%;
+    padding: 12px 14px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+body.rrm[data-page='config'] .editorShell textarea:focus {
+    border-color: transparent;
+    box-shadow: none;
+}
+
 .actionRow {
     display: flex;
     gap: 8px;
@@ -598,6 +1039,8 @@ body.rrm textarea {
 }
 
 .tableWrap {
+    min-width: 0;
+    max-width: 100%;
     margin-top: 12px;
     border: 1px solid var(--line);
     border-radius: 16px;
@@ -716,10 +1159,12 @@ body.rrm textarea::-webkit-scrollbar-thumb:hover {
 }
 
 #logView {
-    min-height: 180px;
+    min-height: 0;
     margin: 0;
     padding: 14px 16px;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: scroll;
+    scrollbar-gutter: stable;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
     background:
@@ -730,6 +1175,108 @@ body.rrm textarea::-webkit-scrollbar-thumb:hover {
     line-height: 1.45;
     font-size: 12px;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.widePanel {
+    grid-column: 1 / -1;
+    min-width: 0;
+}
+
+body.rrm[data-page='hardware'] .tableWrap {
+    overflow-x: hidden;
+}
+
+.pciTable {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+}
+
+.usbTable {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+}
+
+body.rrm[data-page='hardware'] .listTable th,
+body.rrm[data-page='hardware'] .listTable td,
+body.rrm[data-page='hardware'] .listTable th.colName,
+body.rrm[data-page='hardware'] .listTable td:first-child {
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    overflow: visible;
+    text-overflow: clip;
+}
+
+.pciTable td:first-child,
+.usbTable td:first-child {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.pciTable th.colPciVidPid,
+.pciTable td:nth-child(4),
+.usbTable th.colUsbBus,
+.usbTable td:first-child,
+.usbTable th.colUsbDevice,
+.usbTable td:nth-child(2),
+.usbTable th.colUsbVidPid,
+.usbTable td:nth-child(3) {
+    white-space: normal;
+}
+
+.pciTable th.colPciPath,
+.pciTable td:nth-child(1) {
+    width: 16%;
+}
+
+.pciTable th.colPciType,
+.pciTable td:nth-child(2) {
+    width: 18%;
+}
+
+.pciTable th.colPciDevice,
+.pciTable td:nth-child(3) {
+    width: 34%;
+}
+
+.pciTable th.colPciVidPid,
+.pciTable td:nth-child(4) {
+    width: 14%;
+}
+
+.pciTable th.colPciDriver,
+.pciTable td:nth-child(5) {
+    width: 18%;
+}
+
+.usbTable th.colUsbBus,
+.usbTable td:nth-child(1) {
+    width: 12%;
+}
+
+.usbTable th.colUsbDevice,
+.usbTable td:nth-child(2) {
+    width: 12%;
+}
+
+.usbTable th.colUsbVidPid,
+.usbTable td:nth-child(3) {
+    width: 16%;
+}
+
+.usbTable th.colUsbName,
+.usbTable td:nth-child(4) {
+    width: 60%;
+}
+
+.emptyCell {
+    text-align: left;
+    color: var(--muted);
 }
 
 .toast {

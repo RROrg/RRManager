@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html class="rrmHtml" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RR Manager Hardware</title>
+    <link rel="stylesheet" href="/webman/3rdparty/rr-manager/style.css">
+</head>
+<body class="rrm subPage compactFlowPage" data-page="hardware">
+    <main class="grid embeddedGrid overviewGrid overviewSimpleGrid compactFlow">
+        <section class="panel compactPanel widePanel">
+            <div class="panelHead">
+                <div>
+                    <p class="sectionEyebrow" data-i18n="hardware.pciEyebrow">PCI Hardware</p>
+                    <h2 data-i18n="hardware.pciTitle">PCI Devices</h2>
+                </div>
+                <button id="refreshOverview" type="button" data-i18n="common.refresh">Refresh</button>
+            </div>
+            <div class="tableWrap">
+                <table class="listTable pciTable">
+                    <thead>
+                        <tr>
+                            <th class="colPciPath" data-i18n="hardware.pciPath">PCI Path</th>
+                            <th class="colPciType" data-i18n="hardware.pciType">Type</th>
+                            <th class="colPciDevice" data-i18n="hardware.pciDevice">Device</th>
+                            <th class="colPciVidPid" data-i18n="hardware.pciVidPid">VID:PID</th>
+                            <th class="colPciDriver" data-i18n="hardware.pciDriver">Driver</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pciTableBody">
+                        <tr><td colspan="5" class="emptyCell" data-i18n="common.loading">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="panel compactPanel widePanel">
+            <div class="panelHead">
+                <div>
+                    <p class="sectionEyebrow" data-i18n="hardware.usbEyebrow">USB Hardware</p>
+                    <h2 data-i18n="hardware.usbTitle">USB Devices</h2>
+                </div>
+            </div>
+            <div class="tableWrap">
+                <table class="listTable usbTable">
+                    <thead>
+                        <tr>
+                            <th class="colUsbBus" data-i18n="hardware.usbBus">Bus</th>
+                            <th class="colUsbDevice" data-i18n="hardware.usbDevice">Device</th>
+                            <th class="colUsbVidPid" data-i18n="hardware.usbVidPid">VID:PID</th>
+                            <th class="colUsbName" data-i18n="hardware.usbName">Name</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usbTableBody">
+                        <tr><td colspan="4" class="emptyCell" data-i18n="common.loading">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+    <div class="toast" id="toast" hidden></div>
+    <script src="/webman/3rdparty/rr-manager/app.js"></script>
+</body>
+</html>

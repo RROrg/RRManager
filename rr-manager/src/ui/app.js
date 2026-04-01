@@ -4,8 +4,9 @@
         en: {
             'title.shell': 'RR Manager',
             'title.overview': 'Overview - RR Manager',
+            'title.hardware': 'Hardware - RR Manager',
             'title.config': 'Config - RR Manager',
-            'title.addons': 'Addons - RR Manager',
+            'title.addons': 'addons - RR Manager',
             'title.modules': 'Modules - RR Manager',
             'title.update': 'Update - RR Manager',
             'common.appName': 'RR Manager',
@@ -14,6 +15,8 @@
             'common.reload': 'Reload',
             'common.save': 'Save',
             'common.saved': 'Saved successfully.',
+            'common.rebootPending': 'pending reboot',
+            'common.rebootRequiredHint': 'Reboot DSM when you are ready.',
             'common.unknown': 'unknown',
             'common.idle': 'idle',
             'common.running': 'running',
@@ -31,8 +34,9 @@
             'common.noLog': 'No log output yet.',
             'common.readFailed': 'Read failed.',
             'nav.overview': 'Overview',
+            'nav.hardware': 'Hardware',
             'nav.config': 'Config',
-            'nav.addons': 'Addons',
+            'nav.addons': 'addons',
             'nav.modules': 'Modules',
             'nav.update': 'Update',
             'shell.eyebrow': 'DSM Bootloader Control',
@@ -46,6 +50,7 @@
             'overview.bootEyebrow': 'Bootloader',
             'overview.bootTitle': 'Boot Info',
             'overview.dmi': 'DMI',
+            'overview.deviceType': 'Type',
             'overview.cpu': 'CPU',
             'overview.memory': 'Memory',
             'overview.dmiVendor': 'DMI Vendor',
@@ -53,18 +58,33 @@
             'overview.productVersion': 'Product Version',
             'overview.bios': 'BIOS',
             'overview.cpuCores': 'CPU Cores',
-            'overview.kernelArch': 'Kernel / Arch',
             'overview.currentVersion': 'Current RR Version',
-            'overview.bootType': 'Boot Type',
+            'overview.diskType': 'Disk Type',
             'overview.bootModel': 'Model',
             'overview.bootVersion': 'Version',
             'overview.bootKernel': 'Kernel',
             'overview.bootLkm': 'LKM',
             'overview.bootMev': 'MEV',
-            'addons.eyebrow': 'Packages',
-            'addons.save': 'Save Addons',
+            'overview.bootAuth': 'Auth',
+            'hardware.pciEyebrow': 'PCI Hardware',
+            'hardware.pciTitle': 'PCI Devices / Drivers',
+            'hardware.pciPath': 'PCI Path',
+            'hardware.pciType': 'Type',
+            'hardware.pciDevice': 'Device',
+            'hardware.pciVidPid': 'VID:PID',
+            'hardware.pciDriver': 'Driver',
+            'hardware.pciEmpty': 'No PCI device data found.',
+            'hardware.usbEyebrow': 'USB Hardware',
+            'hardware.usbTitle': 'USB Devices',
+            'hardware.usbBus': 'Bus',
+            'hardware.usbDevice': 'Device',
+            'hardware.usbVidPid': 'VID:PID',
+            'hardware.usbName': 'Name',
+            'hardware.usbEmpty': 'No USB device data found.',
+            'addons.eyebrow': 'addons',
+            'addons.save': 'Save addons',
             'addons.filter': 'Filter',
-            'addons.searchPlaceholder': 'Search addon name or description',
+            'addons.searchPlaceholder': 'Search addons by name or description',
             'modules.eyebrow': 'Kernel',
             'modules.save': 'Save Modules',
             'modules.filter': 'Filter',
@@ -74,7 +94,6 @@
             'config.preparing': 'Preparing editor...',
             'config.save': 'Save To Bootloader',
             'config.loadingFile': 'Loading {file} ...',
-            'config.metaPath': '{label} path: {path}',
             'update.stateEyebrow': 'Status',
             'update.overviewTitle': 'Update Overview',
             'update.releaseEyebrow': 'Release',
@@ -100,11 +119,15 @@
             'update.latestVersionRelease': 'Latest Version',
             'update.publishedAt': 'Published At',
             'update.asset': 'Asset',
+            'update.github': 'GitHub',
             'update.noAsset': 'no update asset found',
             'update.loadingBoot': 'Loading boot information...',
             'update.loadingRelease': 'Loading release information...',
             'update.loadingLog': 'Loading job log...',
             'update.loadingState': 'Loading update state...',
+            'update.unavailableTitle': 'Upgrade in progress',
+            'update.unavailableBody': 'This page is unavailable while RR is upgrading.',
+            'update.unavailableHint': 'Open the Update page to view progress and logs.',
             'update.onlineStarted': 'Online update started.',
             'update.localStarted': 'Local update started.',
             'update.enterLocalPath': 'Enter a local update zip path first.',
@@ -118,8 +141,9 @@
         'zh-CN': {
             'title.shell': 'RR Manager',
             'title.overview': '概览 - RR Manager',
+            'title.hardware': '硬件 - RR Manager',
             'title.config': '配置 - RR Manager',
-            'title.addons': '扩展 - RR Manager',
+            'title.addons': '插件 - RR Manager',
             'title.modules': '驱动 - RR Manager',
             'title.update': '更新 - RR Manager',
             'common.appName': 'RR Manager',
@@ -128,6 +152,8 @@
             'common.reload': '重新载入',
             'common.save': '保存',
             'common.saved': '保存成功。',
+            'common.rebootPending': '待重启',
+            'common.rebootRequiredHint': '可在方便时重启 DSM。',
             'common.unknown': '未知',
             'common.idle': '空闲',
             'common.running': '运行中',
@@ -145,8 +171,9 @@
             'common.noLog': '暂无日志输出。',
             'common.readFailed': '读取失败。',
             'nav.overview': '概览',
+            'nav.hardware': '硬件',
             'nav.config': '配置',
-            'nav.addons': '扩展',
+            'nav.addons': '插件',
             'nav.modules': '驱动',
             'nav.update': '更新',
             'shell.eyebrow': 'DSM 引导管理',
@@ -160,6 +187,7 @@
             'overview.bootEyebrow': '引导器',
             'overview.bootTitle': '引导信息',
             'overview.dmi': 'DMI',
+            'overview.deviceType': '类型',
             'overview.cpu': 'CPU',
             'overview.memory': '内存',
             'overview.dmiVendor': 'DMI 厂商',
@@ -167,18 +195,33 @@
             'overview.productVersion': '设备版本',
             'overview.bios': 'BIOS',
             'overview.cpuCores': 'CPU 核心数',
-            'overview.kernelArch': '内核 / 架构',
             'overview.currentVersion': '当前 RR 版本',
-            'overview.bootType': '引导类型',
+            'overview.diskType': '磁盘类型',
             'overview.bootModel': '机型',
             'overview.bootVersion': '版本',
             'overview.bootKernel': '内核',
             'overview.bootLkm': 'LKM',
             'overview.bootMev': 'MEV',
-            'addons.eyebrow': '扩展',
-            'addons.save': '保存扩展',
+            'overview.bootAuth': '鉴权信息',
+            'hardware.pciEyebrow': 'PCI 硬件',
+            'hardware.pciTitle': 'PCI 设备',
+            'hardware.pciPath': 'PCI 路径',
+            'hardware.pciType': '类型',
+            'hardware.pciDevice': '设备',
+            'hardware.pciVidPid': 'VID:PID',
+            'hardware.pciDriver': '驱动',
+            'hardware.pciEmpty': '未获取到 PCI 设备信息。',
+            'hardware.usbEyebrow': 'USB 硬件',
+            'hardware.usbTitle': 'USB 设备',
+            'hardware.usbBus': '总线',
+            'hardware.usbDevice': '设备',
+            'hardware.usbVidPid': 'VID:PID',
+            'hardware.usbName': '名称',
+            'hardware.usbEmpty': '未获取到 USB 设备信息。',
+            'addons.eyebrow': '插件',
+            'addons.save': '保存插件',
             'addons.filter': '筛选',
-            'addons.searchPlaceholder': '搜索扩展名称或描述',
+            'addons.searchPlaceholder': '搜索插件名称或描述',
             'modules.eyebrow': '内核',
             'modules.save': '保存驱动',
             'modules.filter': '筛选',
@@ -188,7 +231,6 @@
             'config.preparing': '正在准备编辑器...',
             'config.save': '保存到引导器',
             'config.loadingFile': '正在加载 {file} ...',
-            'config.metaPath': '{label} 路径: {path}',
             'update.stateEyebrow': '状态',
             'update.overviewTitle': '更新概览',
             'update.releaseEyebrow': '发行版本',
@@ -214,11 +256,15 @@
             'update.latestVersionRelease': '最新版本',
             'update.publishedAt': '发布时间',
             'update.asset': '资源文件',
+            'update.github': 'GitHub',
             'update.noAsset': '未找到更新资源',
             'update.loadingBoot': '正在加载引导信息...',
             'update.loadingRelease': '正在加载版本信息...',
             'update.loadingLog': '正在加载任务日志...',
             'update.loadingState': '正在加载更新状态...',
+            'update.unavailableTitle': '升级进行中',
+            'update.unavailableBody': '升级期间，当前页面暂不可用。',
+            'update.unavailableHint': '请切换到更新页查看进度和日志。',
             'update.onlineStarted': '已启动在线升级。',
             'update.localStarted': '已启动本地升级。',
             'update.enterLocalPath': '请先输入本地更新 ZIP 路径。',
@@ -233,7 +279,9 @@
     var state = {
         release: null,
         updateRunning: false,
+        upgradeBlocked: false,
         currentFile: 'user-config',
+        configLoaded: false,
         items: [],
         retryTimers: {},
         locale: 'en',
@@ -498,7 +546,97 @@
         if (normalized === 'present') {
             return t('common.present');
         }
+        if (normalized === 'pending-reboot' || normalized === 'reboot-required') {
+            return t('common.rebootPending');
+        }
         return value;
+    }
+
+    function withRebootHint(message) {
+        var hint = t('common.rebootRequiredHint');
+
+        if (!message) {
+            return hint;
+        }
+        if (message.indexOf(hint) !== -1) {
+            return message;
+        }
+        return message + ' ' + hint;
+    }
+
+    function isRebootPendingState(value) {
+        var normalized;
+
+        if (typeof value !== 'string') {
+            return false;
+        }
+
+        normalized = value.toLowerCase();
+        return normalized === 'pending-reboot' || normalized === 'reboot-required';
+    }
+
+    function rebootBannerMessage(data) {
+        return withRebootHint((data && data.updateMessage) || '');
+    }
+
+    function ensureRebootBanner() {
+        var banner = $('rebootBanner');
+        var container;
+        var main;
+
+        if (page === 'shell') {
+            return null;
+        }
+
+        if (banner) {
+            return banner;
+        }
+
+        main = document.querySelector('main');
+        container = document.body;
+        if (!container || !main) {
+            return null;
+        }
+
+        banner = document.createElement('section');
+        banner.id = 'rebootBanner';
+        banner.className = 'rebootBanner';
+        banner.hidden = true;
+        banner.innerHTML =
+            '<div class="rebootBannerBody">' +
+            '<span class="rebootBannerBadge">' + escapeHtml(t('common.rebootPending')) + '</span>' +
+            '<div class="rebootBannerCopy">' +
+            '<strong id="rebootBannerTitle">' + escapeHtml(t('common.rebootPending')) + '</strong>' +
+            '<p id="rebootBannerText">' + escapeHtml(t('common.rebootRequiredHint')) + '</p>' +
+            '</div>' +
+            '</div>';
+        container.insertBefore(banner, main);
+        return banner;
+    }
+
+    function syncRebootBanner(data) {
+        var banner = ensureRebootBanner();
+        var visible = !!(data && isRebootPendingState(data.updateState));
+        var title = $('rebootBannerTitle');
+        var text = $('rebootBannerText');
+
+        if (!banner) {
+            return;
+        }
+
+        if (!visible) {
+            banner.hidden = true;
+            return;
+        }
+
+        if (title) {
+            title.textContent = t('common.rebootPending');
+        }
+        if (text) {
+            text.textContent = rebootBannerMessage(data);
+        }
+
+        banner.hidden = false;
     }
 
     function renderStats(items) {
@@ -511,8 +649,103 @@
 
     function renderStatusLines(items) {
         return items.map(function (item) {
-            return escapeHtml(item[0]) + ': <strong>' + escapeHtml(displayValue(item[1])) + '</strong>';
-        }).join('<br>');
+            return '<div class="statusLine"><span class="statusLabel">' + escapeHtml(item[0]) +
+                '</span><span class="statusValue">' + escapeHtml(displayValue(item[1])) + '</span></div>';
+        }).join('');
+    }
+
+    function formatBootAuth(boot) {
+        var values = [];
+
+        if (boot.sn && boot.sn !== 'unknown') {
+            values.push('SN: ' + boot.sn);
+        }
+        if (boot.mac1 && boot.mac1 !== 'unknown') {
+            values.push('MAC1: ' + boot.mac1);
+        }
+        if (boot.mac2 && boot.mac2 !== 'unknown') {
+            values.push('MAC2: ' + boot.mac2);
+        }
+
+        return values.length ? values.join(' | ') : t('common.unknown');
+    }
+
+    function formatCpuCt(hardware) {
+        var cores = hardware.cpuCores || t('common.unknown');
+        var threads = hardware.cpuThreads || t('common.unknown');
+
+        return String(cores) + ' / ' + String(threads);
+    }
+
+    function formatBootKernel(boot, hardware) {
+        var bootKernel = boot.kernel || '';
+        var systemKernel = hardware.kernel || '';
+
+        if (!bootKernel && !systemKernel) {
+            return t('common.unknown');
+        }
+        if (!bootKernel) {
+            return systemKernel;
+        }
+        if (!systemKernel) {
+            return bootKernel;
+        }
+        if (bootKernel === systemKernel) {
+            return bootKernel;
+        }
+
+        return bootKernel + ' + ' + systemKernel;
+    }
+
+    function renderPciTable(items, emptyText) {
+        if (!items || !items.length) {
+            return '<tr><td colspan="5" class="emptyCell">' + escapeHtml(emptyText || t('hardware.pciEmpty')) + '</td></tr>';
+        }
+
+        return items.map(function (item) {
+            return '<tr>' +
+                '<td>' + escapeHtml(displayValue(item.path || t('common.unknown'))) + '</td>' +
+                '<td>' + escapeHtml(displayValue(item.type || t('common.unknown'))) + '</td>' +
+                '<td>' + escapeHtml(displayValue(item.device || t('common.unknown'))) + '</td>' +
+                '<td>' + escapeHtml(displayValue(item.vidpid || t('common.unknown'))) + '</td>' +
+                '<td>' + escapeHtml(displayValue(item.driver || '-')) + '</td>' +
+                '</tr>';
+        }).join('');
+    }
+
+    function updatePciTable(items, emptyText) {
+        var tableBody = $('pciTableBody');
+
+        if (!tableBody) {
+            return;
+        }
+
+        tableBody.innerHTML = renderPciTable(items, emptyText);
+    }
+
+    function renderUsbTable(items, emptyText) {
+        if (!items || !items.length) {
+            return '<tr><td colspan="4" class="emptyCell">' + escapeHtml(emptyText || t('hardware.usbEmpty')) + '</td></tr>';
+        }
+
+        return items.map(function (item) {
+            return '<tr>' +
+                '<td>' + escapeHtml(displayValue(item.bus || t('common.unknown'))) + '</td>' +
+                '<td>' + escapeHtml(displayValue(item.device || t('common.unknown'))) + '</td>' +
+                '<td>' + escapeHtml(displayValue(item.vidpid || t('common.unknown'))) + '</td>' +
+                '<td>' + escapeHtml(displayValue(item.name || t('common.unknown'))) + '</td>' +
+                '</tr>';
+        }).join('');
+    }
+
+    function updateUsbTable(items, emptyText) {
+        var tableBody = $('usbTableBody');
+
+        if (!tableBody) {
+            return;
+        }
+
+        tableBody.innerHTML = renderUsbTable(items, emptyText);
     }
 
     function getQueryLocale() {
@@ -721,6 +954,84 @@
         scheduleLoadingHide();
     }
 
+    function pageUsesUpgradeBlock() {
+        return page !== 'shell' && page !== 'update';
+    }
+
+    function ensureUpgradeBlockMask() {
+        var mask = $('upgradeBlockMask');
+
+        if (mask) {
+            return mask;
+        }
+
+        mask = document.createElement('div');
+        mask.id = 'upgradeBlockMask';
+        mask.className = 'upgradeBlockMask';
+        mask.hidden = true;
+        mask.innerHTML =
+            '<div class="upgradeBlockCard">' +
+            '<p class="sectionEyebrow" id="upgradeBlockEyebrow"></p>' +
+            '<h2 id="upgradeBlockTitle"></h2>' +
+            '<p class="upgradeBlockBody" id="upgradeBlockBody"></p>' +
+            '<div class="heroStatus inlineHeroStatus" id="upgradeBlockStatus"></div>' +
+            '</div>';
+        document.body.appendChild(mask);
+        return mask;
+    }
+
+    function setUpgradeBlocked(visible, data) {
+        var mask;
+        var message;
+        var statusItems;
+
+        if (!pageUsesUpgradeBlock()) {
+            return false;
+        }
+
+        mask = ensureUpgradeBlockMask();
+        state.upgradeBlocked = !!visible;
+        document.body.classList.toggle('isUpgradeBlocked', !!visible);
+
+        if (!visible) {
+            mask.hidden = true;
+            mask.style.display = 'none';
+            return false;
+        }
+
+        clearLoadingNow();
+        message = (data && data.updateMessage) || t('update.unavailableHint');
+        statusItems = [
+            [t('update.updateStateStat'), (data && data.updateState) || t('common.running')],
+            [t('update.jobMessage'), message]
+        ];
+
+        $('upgradeBlockEyebrow').textContent = t('update.stateEyebrow');
+        $('upgradeBlockTitle').textContent = t('update.unavailableTitle');
+        $('upgradeBlockBody').textContent = t('update.unavailableBody');
+        $('upgradeBlockStatus').innerHTML = renderStatusLines(statusItems);
+        mask.hidden = false;
+        mask.style.display = 'flex';
+        return true;
+    }
+
+    function syncUpgradeBlocked(data) {
+        state.updateRunning = !!(data && data.updateRunning);
+
+        if (!pageUsesUpgradeBlock()) {
+            return false;
+        }
+
+        if (state.updateRunning) {
+            return setUpgradeBlocked(true, data);
+        }
+
+        if (state.upgradeBlocked) {
+            setUpgradeBlocked(false);
+        }
+        return false;
+    }
+
     function request(action, options) {
         options = options || {};
         var method = options.method || 'GET';
@@ -784,6 +1095,10 @@
         return !!(error && (error.busy || error.status === 409 || /busy/i.test(error.message || '')));
     }
 
+    function isRetryBusyResult(data) {
+        return !!(data && data.busy && data.retry);
+    }
+
     function renderLoadingStats(items) {
         return items.map(function (item) {
             return '<div class="stat"><span class="statLabel">' + escapeHtml(item[0]) +
@@ -799,12 +1114,17 @@
         }, 1600);
     }
 
+    function clearBusyRetry(key) {
+        clearTimeout(state.retryTimers[key]);
+        delete state.retryTimers[key];
+    }
+
     function setBusyLoading(message) {
         var loadingMessage = message || t('common.loading');
         var heroStatus = $('heroStatus');
         var overviewStats = $('overviewStats');
         var bootStats = $('bootStats');
-
+        var authStats = $('authStats');
         if (heroStatus) {
             heroStatus.textContent = loadingMessage;
         }
@@ -822,6 +1142,17 @@
                 [t('common.loader'), t('common.pleaseWait')]
             ]);
         }
+
+        if (authStats) {
+            authStats.innerHTML = renderLoadingStats([
+                [t('overview.sn'), t('common.loading')],
+                [t('overview.mac1'), t('common.loading')],
+                [t('overview.mac2'), t('common.loading')]
+            ]);
+        }
+
+        updatePciTable(null, loadingMessage);
+        updateUsbTable(null, loadingMessage);
 
         freezeLoading(loadingMessage, 1500);
     }
@@ -852,30 +1183,37 @@
         var hardware;
         var boot;
         var dmiSummary;
+        var updateSummary;
 
         clearLoadingNow();
+        state.updateRunning = !!data.updateRunning;
+        syncRebootBanner(data);
 
         if (page === 'update') {
-            $('heroStatus').innerHTML = renderStatusLines([
-                [t('update.currentVersion'), data.currentVersion || t('common.unknown')],
-                [t('update.updateState'), data.updateState || t('common.idle')],
-                [t('update.backgroundJob'), data.updateRunning ? t('common.running') : t('common.idle')]
-            ]);
-
+            updateSummary = data.updateMessage || t('common.ready');
             $('overviewStats').innerHTML = renderStats([
-                [t('update.currentVersionStat'), data.currentVersion || t('common.unknown')],
-                [t('update.updateStateStat'), data.updateState || t('common.idle')],
-                [t('update.lockStat'), data.busy ? t('common.busy') : t('common.idle')],
-                [t('update.jobMessage'), data.updateMessage || t('common.ready')]
+                [t('update.jobMessage'), updateSummary],
+                [t('update.backgroundJob'), data.updateRunning ? t('common.running') : t('common.idle')],
+                [t('update.updateStateStat'), data.updateState || t('common.idle')]
             ]);
 
-            state.updateRunning = !!data.updateRunning;
+            if (data.updateRunning) {
+                clearBusyRetry('release');
+            }
+
             if ($('startLocalUpdate')) {
                 $('startLocalUpdate').disabled = data.updateRunning;
             }
             if ($('startOnlineUpdate')) {
                 $('startOnlineUpdate').disabled = !state.release || data.updateRunning;
             }
+            if ($('checkRelease')) {
+                $('checkRelease').disabled = data.updateRunning;
+            }
+            return;
+        }
+
+        if (syncUpgradeBlocked(data)) {
             return;
         }
 
@@ -885,32 +1223,38 @@
             return value && value !== 'unknown';
         }).join(' / ');
 
-        $('heroStatus').innerHTML = renderStatusLines([
-            [t('overview.dmi'), dmiSummary || t('common.unknown')],
-            [t('overview.cpu'), hardware.cpuModel || t('common.unknown')],
-            [t('overview.memory'), hardware.ramTotal || t('common.unknown')]
-        ]);
-
-        $('overviewStats').innerHTML = renderStats([
-            [t('overview.dmiVendor'), hardware.dmiVendor || t('common.unknown')],
-            [t('overview.product'), hardware.dmiProduct || t('common.unknown')],
-            [t('overview.productVersion'), hardware.dmiVersion || t('common.unknown')],
-            [t('overview.bios'), hardware.biosVersion || t('common.unknown')],
-            [t('overview.cpuCores'), hardware.cpuCores || t('common.unknown')],
-            [t('overview.kernelArch'), (hardware.kernel || t('common.unknown')) + ' / ' + (hardware.arch || t('common.unknown'))]
-        ]);
+        if ($('overviewStats')) {
+            $('overviewStats').innerHTML = renderStats([
+                [t('overview.dmi'), dmiSummary || t('common.unknown')],
+                [t('overview.bios'), hardware.biosVersion || t('common.unknown')],
+                [t('overview.deviceType'), hardware.firmwareMode || t('common.unknown')],
+                [t('overview.cpu'), hardware.cpuModel || t('common.unknown')],
+                [t('overview.cpuCt'), formatCpuCt(hardware)],
+                [t('overview.memory'), hardware.ramTotal || t('common.unknown')]
+            ]);
+        }
 
         if ($('bootStats')) {
             $('bootStats').innerHTML = renderStats([
-                [t('overview.currentVersion'), data.currentVersion || t('common.unknown')],
-                [t('overview.bootType'), boot.bootType || t('common.unknown')],
                 [t('overview.bootModel'), boot.model || t('common.unknown')],
                 [t('overview.bootVersion'), boot.version || t('common.unknown')],
-                [t('overview.bootKernel'), boot.kernel || t('common.unknown')],
+                [t('overview.bootKernel'), formatBootKernel(boot, hardware)],
                 [t('overview.bootLkm'), boot.lkm || t('common.unknown')],
-                [t('overview.bootMev'), boot.mev || t('common.unknown')]
+                [t('overview.bootMev'), boot.mev || t('common.unknown')],
+                [t('overview.diskType'), boot.bootType || t('common.unknown')]
             ]);
         }
+
+        if ($('authStats')) {
+            $('authStats').innerHTML = renderStats([
+                [t('overview.sn'), boot.sn || t('common.unknown')],
+                [t('overview.mac1'), boot.mac1 || t('common.unknown')],
+                [t('overview.mac2'), boot.mac2 || t('common.unknown')]
+            ]);
+        }
+
+        updatePciTable(hardware.pciDevices || [], t('hardware.pciEmpty'));
+        updateUsbTable(hardware.usbDevices || [], t('hardware.usbEmpty'));
     }
 
     function renderRelease(data) {
@@ -921,7 +1265,7 @@
             '<div class="stat"><span class="statLabel">' + escapeHtml(t('update.latestVersionRelease')) + '</span><span class="statValue">' + escapeHtml(displayValue(data.latestVersion)) + '</span></div>' +
             '<div class="stat"><span class="statLabel">' + escapeHtml(t('update.publishedAt')) + '</span><span class="statValue">' + escapeHtml(displayValue(data.publishedAt)) + '</span></div>' +
             '<div class="stat"><span class="statLabel">' + escapeHtml(t('update.asset')) + '</span><span class="statValue">' + escapeHtml(data.assetName || t('update.noAsset')) + '</span></div>' +
-            '<div class="hint"><a href="' + escapeHtml(data.htmlUrl || '#') + '" target="_blank" rel="noreferrer">' + escapeHtml(data.htmlUrl || '') + '</a></div>';
+            '<div class="stat hint"><span class="statLabel">' + escapeHtml(t('update.github')) + '</span><span class="statValue"><a href="' + escapeHtml(data.htmlUrl || '#') + '" target="_blank" rel="noreferrer">' + escapeHtml(data.htmlUrl || '') + '</a></span></div>';
         if ($('startOnlineUpdate')) {
             $('startOnlineUpdate').disabled = !data.assetUrl || state.updateRunning;
         }
@@ -941,8 +1285,30 @@
     }
 
     function loadRelease(options) {
-        return request('release', options).then(renderRelease).catch(function (error) {
+        if (state.updateRunning) {
+            clearBusyRetry('release');
+            return Promise.resolve();
+        }
+
+        return request('release', options).then(function (data) {
+            if (isRetryBusyResult(data)) {
+                if (state.updateRunning) {
+                    clearBusyRetry('release');
+                    return;
+                }
+                setBusyLoading(t('update.loadingRelease'));
+                scheduleBusyRetry('release', function () {
+                    loadRelease({ silent: true });
+                });
+                return;
+            }
+            renderRelease(data);
+        }).catch(function (error) {
             if (isBusyError(error)) {
+                if (state.updateRunning) {
+                    clearBusyRetry('release');
+                    return;
+                }
                 setBusyLoading(t('update.loadingRelease'));
                 scheduleBusyRetry('release', function () {
                     loadRelease({ silent: true });
@@ -1012,7 +1378,7 @@
         loadOverview();
         (function pollOverview() {
             loadOverview({ silent: true });
-            setTimeout(pollOverview, 12000);
+            setTimeout(pollOverview, state.updateRunning ? 4000 : 12000);
         })();
     }
 
@@ -1087,6 +1453,13 @@
     function loadItems(options) {
         var cfg = itemPageConfig();
         request(cfg.loadAction, options).then(function (data) {
+            if (isRetryBusyResult(data)) {
+                setBusyLoading(t('common.loading'));
+                scheduleBusyRetry('items', function () {
+                    loadItems({ silent: true });
+                });
+                return;
+            }
             clearLoadingNow();
             state.items = data.items || [];
             renderItems();
@@ -1135,7 +1508,7 @@
             method: 'POST',
             data: { items: selected.join(',') }
         }).then(function (data) {
-            setToast(data.message || t('common.saved'), 'success');
+            setToast(withRebootHint(data.message || t('common.saved')), 'success');
             loadItems();
         }).catch(function (error) {
             if (isBusyError(error)) {
@@ -1144,6 +1517,58 @@
             }
             setToast(error.message, 'error');
         });
+    }
+
+    function editorLineCount(value) {
+        if (!value) {
+            return 1;
+        }
+
+        return value.split('\n').length;
+    }
+
+    function syncEditorLineNumberScroll() {
+        var editor = $('editor');
+        var lineNumbers = $('editorLineNumbers');
+
+        if (!editor || !lineNumbers) {
+            return;
+        }
+
+        lineNumbers.style.transform = 'translateY(' + (-editor.scrollTop) + 'px)';
+    }
+
+    function updateEditorLineNumbers() {
+        var editor = $('editor');
+        var lineNumbers = $('editorLineNumbers');
+        var count;
+        var lines;
+        var index;
+
+        if (!editor || !lineNumbers) {
+            return;
+        }
+
+        count = editorLineCount(editor.value);
+        lines = [];
+        for (index = 1; index <= count; index += 1) {
+            lines.push(String(index));
+        }
+
+        lineNumbers.textContent = lines.join('\n');
+        syncEditorLineNumberScroll();
+    }
+
+    function initEditorLineNumbers() {
+        var editor = $('editor');
+
+        if (!editor) {
+            return;
+        }
+
+        editor.addEventListener('input', updateEditorLineNumbers);
+        editor.addEventListener('scroll', syncEditorLineNumberScroll);
+        updateEditorLineNumbers();
     }
 
     function initItemsPage() {
@@ -1152,20 +1577,58 @@
         });
         $('saveItems').addEventListener('click', saveItems);
         $('searchInput').addEventListener('input', renderItems);
-        loadItems();
+
+        (function watchAvailability(initialized) {
+            request('overview', initialized ? { silent: true } : undefined).then(function (data) {
+                var wasBlocked = state.upgradeBlocked;
+                syncRebootBanner(data);
+                var blocked = syncUpgradeBlocked(data);
+
+                if (!blocked && (!initialized || wasBlocked)) {
+                    loadItems(wasBlocked ? { silent: true } : undefined);
+                }
+
+                setTimeout(function () {
+                    watchAvailability(true);
+                }, blocked ? 4000 : 12000);
+            }).catch(function (error) {
+                if (isBusyError(error)) {
+                    setBusyLoading(t('update.loadingState'));
+                    scheduleBusyRetry('items-availability', function () {
+                        watchAvailability(true);
+                    });
+                    return;
+                }
+                setToast(error.message, 'error');
+                setTimeout(function () {
+                    watchAvailability(true);
+                }, 12000);
+            });
+        })(false);
     }
 
     function loadFile(options) {
-        $('editorMeta').textContent = t('config.loadingFile', { file: state.currentFile });
+        state.configLoaded = false;
+        if ($('saveFile')) {
+            $('saveFile').disabled = true;
+        }
         options = options || {};
         options.data = { file: state.currentFile };
         return request('read', options).then(function (data) {
+            if (isRetryBusyResult(data)) {
+                setBusyLoading(t('common.loading'));
+                scheduleBusyRetry('file', function () {
+                    loadFile({ silent: true });
+                });
+                return;
+            }
             clearLoadingNow();
-            $('editorMeta').textContent = t('config.metaPath', {
-                label: data.label,
-                path: data.path
-            });
+            state.configLoaded = true;
+            if ($('saveFile')) {
+                $('saveFile').disabled = false;
+            }
             $('editor').value = data.content || '';
+            updateEditorLineNumbers();
         }).catch(function (error) {
             if (isBusyError(error)) {
                 setBusyLoading(t('common.loading'));
@@ -1174,12 +1637,21 @@
                 });
                 return;
             }
-            $('editorMeta').textContent = t('common.readFailed');
+            state.configLoaded = false;
+            if ($('saveFile')) {
+                $('saveFile').disabled = true;
+            }
+            $('editor').value = '';
+            updateEditorLineNumbers();
             setToast(error.message, 'error');
         });
     }
 
     function saveFile() {
+        if (!state.configLoaded) {
+            setToast(t('common.readFailed'), 'error');
+            return;
+        }
         request('write', {
             method: 'POST',
             data: {
@@ -1187,7 +1659,7 @@
                 content: $('editor').value
             }
         }).then(function (data) {
-            setToast(data.message || t('common.saved'), 'success');
+            setToast(withRebootHint(data.message || t('common.saved')), 'success');
             loadFile();
         }).catch(function (error) {
             if (isBusyError(error)) {
@@ -1200,11 +1672,41 @@
 
     function initConfig() {
         state.currentFile = 'user-config';
+        state.configLoaded = false;
+        $('saveFile').disabled = true;
+        initEditorLineNumbers();
         $('reloadFile').addEventListener('click', function () {
             loadFile();
         });
         $('saveFile').addEventListener('click', saveFile);
-        loadFile();
+
+        (function watchAvailability(initialized) {
+            request('overview', initialized ? { silent: true } : undefined).then(function (data) {
+                var wasBlocked = state.upgradeBlocked;
+                syncRebootBanner(data);
+                var blocked = syncUpgradeBlocked(data);
+
+                if (!blocked && (!initialized || wasBlocked)) {
+                    loadFile(wasBlocked ? { silent: true } : undefined);
+                }
+
+                setTimeout(function () {
+                    watchAvailability(true);
+                }, blocked ? 4000 : 12000);
+            }).catch(function (error) {
+                if (isBusyError(error)) {
+                    setBusyLoading(t('update.loadingState'));
+                    scheduleBusyRetry('config-availability', function () {
+                        watchAvailability(true);
+                    });
+                    return;
+                }
+                setToast(error.message, 'error');
+                setTimeout(function () {
+                    watchAvailability(true);
+                }, 12000);
+            });
+        })(false);
     }
 
     function startPage() {
@@ -1212,7 +1714,7 @@
 
         if (page === 'shell') {
             initShell();
-        } else if (page === 'overview') {
+        } else if (page === 'overview' || page === 'hardware') {
             initOverview();
         } else if (page === 'update') {
             initUpdate();

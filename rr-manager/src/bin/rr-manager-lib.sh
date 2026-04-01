@@ -13,7 +13,11 @@ MOUNTS_FILE="${MOUNTS_FILE:-${WORK_DIR}/mounts.list}"
 UPDATE_STATE="${UPDATE_STATE:-${STATE_DIR}/update.state}"
 UPDATE_LOG="${UPDATE_LOG:-${STATE_DIR}/update.log}"
 UPDATE_PID_FILE="${UPDATE_PID_FILE:-${STATE_DIR}/update.pid}"
-RELEASE_API_URL="${RELEASE_API_URL:-https://api.github.com/repos/RROrg/rr/releases/latest}"
+RELEASE_REPO_URL="${RELEASE_REPO_URL:-https://github.com/RROrg/rr}"
+RELEASE_LATEST_URL="${RELEASE_LATEST_URL:-${RELEASE_REPO_URL}/releases/latest}"
+RELEASE_TAGS_URL="${RELEASE_TAGS_URL:-${RELEASE_REPO_URL}/tags}"
+RELEASE_DOWNLOAD_BASE_URL="${RELEASE_DOWNLOAD_BASE_URL:-${RELEASE_REPO_URL}/releases/download}"
+PRERELEASE="${PRERELEASE:-false}"
 RRMDO_BIN="${RRMDO_BIN:-/sbin/rrmdo}"
 
 rrm_ensure_dirs() {
@@ -71,6 +75,69 @@ rrm_mount_source_is() {
         $1 == device && $2 == mount_point { found = 1 }
         END { exit found ? 0 : 1 }
     ' /proc/mounts
+}
+
+rrm_default_mount_point() {
+    printf '%s/p%s\n' "${MOUNT_BASE}" "$1"
+}
+
+rrm_device_mount_point() {
+    awk -v device="$1" '$1 == device { print $2; exit }' /proc/mounts
+}
+
+rrm_partition_mount_point() {
+    partition="$1"
+    device="/dev/synoboot${partition}"
+    default_mount="$(rrm_default_mount_point "${partition}")"
+
+    if rrm_mount_source_is "${default_mount}" "${device}"; then
+        printf '%s\n' "${default_mount}"
+        return 0
+    fi
+
+    mounted_path="$(rrm_device_mount_point "${device}" 2>/dev/null || true)"
+    if [ -n "${mounted_path}" ]; then
+        printf '%s\n' "${mounted_path}"
+        return 0
+    fi
+
+    printf '%s\n' "${default_mount}"
+}
+
+rrm_partition_path() {
+    partition="$1"
+    path_suffix="$2"
+    mount_point="$(rrm_partition_mount_point "${partition}")" || return 1
+
+    if [ -n "${path_suffix}" ]; then
+        printf '%s/%s\n' "${mount_point}" "${path_suffix}"
+    else
+        printf '%s\n' "${mount_point}"
+    fi
+}
+
+rrm_relative_boot_path() {
+    target_path="$1"
+
+    case "${target_path}" in
+        /mnt/p1) printf '%s\n' 'p1'; return 0 ;;
+        /mnt/p2) printf '%s\n' 'p2'; return 0 ;;
+        /mnt/p3) printf '%s\n' 'p3'; return 0 ;;
+        /mnt/p1/*) printf 'p1/%s\n' "${target_path#/mnt/p1/}"; return 0 ;;
+        /mnt/p2/*) printf 'p2/%s\n' "${target_path#/mnt/p2/}"; return 0 ;;
+        /mnt/p3/*) printf 'p3/%s\n' "${target_path#/mnt/p3/}"; return 0 ;;
+    esac
+
+    for partition in 1 2 3; do
+        mount_point="$(rrm_partition_mount_point "${partition}" 2>/dev/null || true)"
+        [ -n "${mount_point}" ] || continue
+        case "${target_path}" in
+            "${mount_point}") printf 'p%s\n' "${partition}"; return 0 ;;
+            "${mount_point}"/*) printf 'p%s/%s\n' "${partition}" "${target_path#${mount_point}/}"; return 0 ;;
+        esac
+    done
+
+    return 1
 }
 
 rrm_mount_record_add() {
@@ -171,12 +238,17 @@ rrm_mount_partition() {
     partition="$1"
     filesystem="$2"
     device="/dev/synoboot${partition}"
-    mount_point="${MOUNT_BASE}/p${partition}"
+    mount_point="$(rrm_default_mount_point "${partition}")"
 
     [ -b "${device}" ] || return 1
     rrm_do mkdir -p "${mount_point}" || return 1
 
     if rrm_mount_source_is "${mount_point}" "${device}"; then
+        return 0
+    fi
+
+    existing_mount="$(rrm_device_mount_point "${device}" 2>/dev/null || true)"
+    if [ -n "${existing_mount}" ]; then
         return 0
     fi
 
@@ -192,7 +264,7 @@ rrm_mount_partition() {
 rrm_mount_synoboot() {
     rrm_ensure_dirs
 
-    if [ "${RRM_SKIP_MOUNT:-0}" = "1" ] && [ -d "${MOUNT_BASE}/p1" ]; then
+    if [ "${RRM_SKIP_MOUNT:-0}" = "1" ] && [ -n "$(rrm_device_mount_point /dev/synoboot1 2>/dev/null || true)" ]; then
         return 0
     fi
 
@@ -217,11 +289,13 @@ rrm_mount_synoboot() {
         return 1
     }
 
-    rrm_mount_source_is "${MOUNT_BASE}/p1" /dev/synoboot1
+    [ -n "$(rrm_device_mount_point /dev/synoboot1 2>/dev/null || true)" ] || return 1
+    [ -n "$(rrm_device_mount_point /dev/synoboot2 2>/dev/null || true)" ] || return 1
+    [ -n "$(rrm_device_mount_point /dev/synoboot3 2>/dev/null || true)" ]
 }
 
 rrm_current_version() {
-    version_file="${MOUNT_BASE}/p1/RR_VERSION"
+    version_file="$(rrm_partition_path 1 RR_VERSION)"
     [ -f "${version_file}" ] || return 1
 
     version_value="$(sed -n '/[^[:space:]]/ { s/\r$//; p; q; }' "${version_file}" 2>/dev/null)"
@@ -254,9 +328,18 @@ rrm_cpu_model() {
 }
 
 rrm_cpu_cores() {
-    core_count="$(grep -c '^processor' /proc/cpuinfo 2>/dev/null || true)"
+    core_count="$({ sed -n 's/^cpu cores[[:space:]]*:[[:space:]]*//p' /proc/cpuinfo 2>/dev/null | head -n 1; } || true)"
+    if [ -z "${core_count}" ]; then
+        core_count="$(grep -c '^processor' /proc/cpuinfo 2>/dev/null || true)"
+    fi
     [ -n "${core_count}" ] && [ "${core_count}" -gt 0 ] 2>/dev/null || core_count='unknown'
     printf '%s\n' "${core_count}"
+}
+
+rrm_cpu_threads() {
+    thread_count="$(grep -c '^processor' /proc/cpuinfo 2>/dev/null || true)"
+    [ -n "${thread_count}" ] && [ "${thread_count}" -gt 0 ] 2>/dev/null || thread_count='unknown'
+    printf '%s\n' "${thread_count}"
 }
 
 rrm_ram_total() {
@@ -278,6 +361,14 @@ rrm_machine_arch() {
     uname -m 2>/dev/null || printf '%s\n' 'unknown'
 }
 
+rrm_firmware_mode() {
+    if [ -d /sys/firmware/efi ]; then
+        printf '%s\n' 'UEFI'
+    else
+        printf '%s\n' 'Legacy'
+    fi
+}
+
 rrm_boot_access_method() {
     if [ "$(id -u)" = "0" ]; then
         printf '%s\n' 'internal /dev/synoboot* (root)'
@@ -286,6 +377,155 @@ rrm_boot_access_method() {
     else
         printf '%s\n' 'internal /dev/synoboot*'
     fi
+}
+
+rrm_cmdline_value() {
+    key_name="$1"
+    value=''
+    [ -n "${key_name}" ] || return 1
+
+    value="$(tr ' ' '\n' </proc/cmdline 2>/dev/null | grep -m 1 "^${key_name}=" | sed "s/^${key_name}=//" | sed -n '/[^[:space:]]/ { s/\r$//; p; q; }')"
+
+    [ -n "${value}" ] || return 1
+    printf '%s\n' "${value}"
+}
+
+rrm_lspci_details() {
+    command -v lspci >/dev/null 2>&1 || return 1
+
+    lspci -nnk 2>/dev/null | sed 's/\r$//' | sed -n '/[^[:space:]]/p'
+}
+
+rrm_lspci_device_rows() {
+    command -v lspci >/dev/null 2>&1 || return 1
+
+    lspci -nnk 2>/dev/null | {
+        current_path=''
+        current_type=''
+        current_device=''
+        current_vidpid=''
+        current_driver=''
+
+        while IFS= read -r raw_line || [ -n "${raw_line}" ]; do
+            line="$(printf '%s' "${raw_line}" | sed 's/\r$//')"
+
+            case "${line}" in
+                [0-9A-Fa-f][0-9A-Fa-f]:*)
+                    if [ -n "${current_path}" ]; then
+                        printf '%s\t%s\t%s\t%s\t%s\n' \
+                            "${current_path}" \
+                            "${current_type:-unknown}" \
+                            "${current_device:-unknown}" \
+                            "${current_vidpid:-unknown}" \
+                            "${current_driver:--}"
+                    fi
+
+                    current_path="$(printf '%s\n' "${line}" | sed -n 's/^\([^[:space:]]*\)[[:space:]].*/\1/p')"
+                    rest="${line#${current_path} }"
+                    type_part="${rest%%: *}"
+                    device_part="${rest#*: }"
+                    current_type="$(printf '%s\n' "${type_part}" | sed 's/ (prog-if .*)$//')"
+                    current_vidpid="$(printf '%s\n' "${device_part}" | sed -n 's/^.* \[\([0-9A-Fa-f]\{4\}:[0-9A-Fa-f]\{4\}\)\]\( (rev [^)]*)\)\{0,1\}$/\1/p')"
+                    current_device="$(printf '%s\n' "${device_part}" | sed -n 's/^\(.*\) \[[0-9A-Fa-f]\{4\}:[0-9A-Fa-f]\{4\}\]\( (rev [^)]*)\)\{0,1\}$/\1/p')"
+                    [ -n "${current_device}" ] || current_device="$(printf '%s\n' "${device_part}" | sed 's/ (rev [^)]*)$//')"
+                    current_driver='-'
+                    ;;
+                *Kernel\ driver\ in\ use:*)
+                    [ -n "${current_path}" ] || continue
+                    current_driver="$(printf '%s\n' "${line#*: }" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+                    ;;
+            esac
+        done
+
+        if [ -n "${current_path}" ]; then
+            printf '%s\t%s\t%s\t%s\t%s\n' \
+                "${current_path}" \
+                "${current_type:-unknown}" \
+                "${current_device:-unknown}" \
+                "${current_vidpid:-unknown}" \
+                "${current_driver:--}"
+        fi
+    }
+}
+
+rrm_read_sysfs_first_line() {
+    target_file="$1"
+    [ -n "${target_file}" ] || return 1
+    cat "${target_file}" 2>/dev/null | sed -n '1{s/\r$//;p;q;}'
+}
+
+rrm_collect_usb_rows_internal() {
+    usb_listing="$(rrm_do lsusb 2>/dev/null || true)"
+    if [ -n "${usb_listing}" ]; then
+        printf '%s\n' "${usb_listing}" | while IFS= read -r raw_line || [ -n "${raw_line}" ]; do
+            line="$(printf '%s' "${raw_line}" | sed 's/\r$//')"
+            [ -n "${line}" ] || continue
+
+            bus_value="$(printf '%s\n' "${line}" | sed -n 's/^Bus \([0-9][0-9][0-9]\) Device \([0-9][0-9][0-9]\): ID \([0-9A-Fa-f]\{4\}:[0-9A-Fa-f]\{4\}\) \(.*\)$/\1/p')"
+            device_value="$(printf '%s\n' "${line}" | sed -n 's/^Bus \([0-9][0-9][0-9]\) Device \([0-9][0-9][0-9]\): ID \([0-9A-Fa-f]\{4\}:[0-9A-Fa-f]\{4\}\) \(.*\)$/\2/p')"
+            vidpid_value="$(printf '%s\n' "${line}" | sed -n 's/^Bus \([0-9][0-9][0-9]\) Device \([0-9][0-9][0-9]\): ID \([0-9A-Fa-f]\{4\}:[0-9A-Fa-f]\{4\}\) \(.*\)$/\3/p')"
+            name_value="$(printf '%s\n' "${line}" | sed -n 's/^Bus \([0-9][0-9][0-9]\) Device \([0-9][0-9][0-9]\): ID \([0-9A-Fa-f]\{4\}:[0-9A-Fa-f]\{4\}\) \(.*\)$/\4/p')"
+
+            [ -n "${bus_value}" ] || continue
+            [ -n "${device_value}" ] || device_value='unknown'
+            [ -n "${vidpid_value}" ] || vidpid_value='unknown'
+            [ -n "${name_value}" ] || name_value='unknown'
+
+            printf '%s\t%s\t%s\t%s\n' "${bus_value}" "${device_value}" "${vidpid_value}" "${name_value}"
+        done
+        return 0
+    fi
+
+    for device_dir in /sys/bus/usb/devices/*; do
+        [ -d "${device_dir}" ] || continue
+
+        case "$(basename "${device_dir}")" in
+            usb*) continue ;;
+        esac
+
+        bus_value="$(rrm_read_sysfs_first_line "${device_dir}/busnum" 2>/dev/null || true)"
+        device_value="$(rrm_read_sysfs_first_line "${device_dir}/devnum" 2>/dev/null || true)"
+        vendor_value="$(rrm_read_sysfs_first_line "${device_dir}/idVendor" 2>/dev/null || true)"
+        product_value="$(rrm_read_sysfs_first_line "${device_dir}/idProduct" 2>/dev/null || true)"
+        manufacturer_value="$(rrm_read_sysfs_first_line "${device_dir}/manufacturer" 2>/dev/null || true)"
+        name_value="$(rrm_read_sysfs_first_line "${device_dir}/product" 2>/dev/null || true)"
+
+        [ -n "${vendor_value}" ] || continue
+
+        if [ -n "${bus_value}" ] && [ "${bus_value}" -eq "${bus_value}" ] 2>/dev/null; then
+            bus_value="$(printf '%03d' "${bus_value}")"
+        else
+            [ -n "${bus_value}" ] || bus_value='unknown'
+        fi
+
+        if [ -n "${device_value}" ] && [ "${device_value}" -eq "${device_value}" ] 2>/dev/null; then
+            device_value="$(printf '%03d' "${device_value}")"
+        else
+            [ -n "${device_value}" ] || device_value='unknown'
+        fi
+
+        if [ -n "${vendor_value}" ] && [ -n "${product_value}" ]; then
+            vidpid_value="${vendor_value}:${product_value}"
+        else
+            vidpid_value='unknown'
+        fi
+
+        if [ -n "${manufacturer_value}" ] && [ -n "${name_value}" ]; then
+            name_value="${manufacturer_value} ${name_value}"
+        elif [ -n "${manufacturer_value}" ]; then
+            name_value="${manufacturer_value}"
+        elif [ -n "${name_value}" ]; then
+            name_value="${name_value}"
+        else
+            name_value="$(basename "${device_dir}")"
+        fi
+
+        printf '%s\t%s\t%s\t%s\n' "${bus_value}" "${device_value}" "${vidpid_value}" "${name_value}"
+    done
+}
+
+rrm_lsusb_device_rows() {
+    rrm_collect_usb_rows_internal
 }
 
 rrm_managed_file_label() {
@@ -297,7 +537,7 @@ rrm_managed_file_label() {
 
 rrm_managed_file_path() {
     case "$1" in
-        user-config) printf '%s\n' "${MOUNT_BASE}/p1/user-config.yml" ;;
+        user-config) rrm_partition_path 1 user-config.yml ;;
         *) return 1 ;;
     esac
 }
@@ -313,7 +553,8 @@ rrm_backup_existing_path() {
     backup_root="$2"
     [ -e "${target_path}" ] || return 0
 
-    relative_path="${target_path#${MOUNT_BASE}/}"
+    relative_path="$(rrm_relative_boot_path "${target_path}" 2>/dev/null || true)"
+    [ -n "${relative_path}" ] || relative_path="$(basename "${target_path}")"
     backup_path="${backup_root}/${relative_path}"
     mkdir -p "$(dirname "${backup_path}")"
 
@@ -332,6 +573,13 @@ rrm_write_managed_file() {
     backup_root="${STATE_DIR}/backups/manual-${timestamp}"
     temp_path="${target_path}.rrm.$$"
 
+    case "${file_id}" in
+        user-config)
+            grep '[^[:space:]]' "${source_file}" >/dev/null 2>&1 || return 1
+            rrm_validate_yaml_file "${source_file}" >/dev/null 2>&1 || return 1
+            ;;
+    esac
+
     rrm_do mkdir -p "$(dirname "${target_path}")" || return 1
     mkdir -p "${backup_root}" || return 1
     rrm_backup_existing_path "${target_path}" "${backup_root}"
@@ -343,6 +591,35 @@ rrm_write_managed_file() {
 
 rrm_trim() {
     printf '%s' "$1" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
+}
+
+rrm_validate_yaml_file() {
+    source_file="$1"
+    rrm_ensure_dirs
+    error_file="$(mktemp "${WORK_DIR}/yaml-validate.XXXXXX")" || return 1
+
+    if command -v yq >/dev/null 2>&1; then
+        yq eval '.' "${source_file}" >/dev/null 2>"${error_file}"
+        status=$?
+    elif command -v python3 >/dev/null 2>&1 && python3 -c 'import yaml' >/dev/null 2>&1; then
+        python3 -c 'import sys, yaml; yaml.safe_load(open(sys.argv[1], "r", encoding="utf-8").read())' "${source_file}" >/dev/null 2>"${error_file}"
+        status=$?
+    elif command -v python >/dev/null 2>&1 && python -c 'import yaml' >/dev/null 2>&1; then
+        python -c 'import sys, yaml; yaml.safe_load(open(sys.argv[1], "r").read())' "${source_file}" >/dev/null 2>"${error_file}"
+        status=$?
+    else
+        rm -f "${error_file}"
+        return 0
+    fi
+
+    if [ "${status}" -ne 0 ]; then
+        sed -n '/[^[:space:]]/ { s/\r$//; p; q; }' "${error_file}"
+        rm -f "${error_file}"
+        return 1
+    fi
+
+    rm -f "${error_file}"
+    return 0
 }
 
 rrm_yaml_map_keys() {
@@ -527,7 +804,7 @@ rrm_manifest_description() {
 
 rrm_addons_json() {
     config_file="$1"
-    addons_root="${MOUNT_BASE}/p3/addons"
+    addons_root="$(rrm_partition_path 3 addons)"
     first=1
 
     [ -d "${addons_root}" ] || {
@@ -726,11 +1003,11 @@ rrm_current_module_path() {
     pkver="$(printf '%s' "${selector}" | cut -d'|' -f3)"
 
     if [ "${kernel_kind}" = "custom" ]; then
-        primary_path="${MOUNT_BASE}/p3/cks/modules-${platform}-${pkver}.tgz"
-        fallback_path="${MOUNT_BASE}/p3/modules/${platform}-${pkver}.tgz"
+        primary_path="$(rrm_partition_path 3 "cks/modules-${platform}-${pkver}.tgz")"
+        fallback_path="$(rrm_partition_path 3 "modules/${platform}-${pkver}.tgz")"
     else
-        primary_path="${MOUNT_BASE}/p3/modules/${platform}-${pkver}.tgz"
-        fallback_path="${MOUNT_BASE}/p3/cks/modules-${platform}-${pkver}.tgz"
+        primary_path="$(rrm_partition_path 3 "modules/${platform}-${pkver}.tgz")"
+        fallback_path="$(rrm_partition_path 3 "cks/modules-${platform}-${pkver}.tgz")"
     fi
 
     if [ -f "${primary_path}" ]; then
@@ -836,11 +1113,36 @@ rrm_modules_json() {
 
 rrm_http_get() {
     if command -v curl >/dev/null 2>&1; then
-        curl -fsSL "$1"
+        curl -fskL --connect-timeout 10 "$1"
         return $?
     fi
     if command -v wget >/dev/null 2>&1; then
-        wget -qO- "$1"
+        wget --no-check-certificate -qO- "$1"
+        return $?
+    fi
+    return 1
+}
+
+rrm_http_resolve_effective_url() {
+    if command -v curl >/dev/null 2>&1; then
+        curl -fskL --connect-timeout 10 -w '%{url_effective}' -o /dev/null "$1"
+        return $?
+    fi
+    if command -v wget >/dev/null 2>&1; then
+        wget --no-check-certificate --server-response --max-redirect=20 --spider "$1" 2>&1 |
+            awk '/^[[:space:]]*Location: / { location = $2 } END { gsub(/\r/, "", location); if (location != "") print location; }'
+        return $?
+    fi
+    return 1
+}
+
+rrm_http_exists() {
+    if command -v curl >/dev/null 2>&1; then
+        curl -fskIL --connect-timeout 10 "$1" >/dev/null 2>&1
+        return $?
+    fi
+    if command -v wget >/dev/null 2>&1; then
+        wget --no-check-certificate -q --spider "$1"
         return $?
     fi
     return 1
@@ -852,44 +1154,65 @@ rrm_download_to() {
     mkdir -p "$(dirname "${output_path}")"
 
     if command -v curl >/dev/null 2>&1; then
-        curl -fsSL --retry 2 --output "${output_path}" "${url}"
+        curl -fkL --retry 2 --connect-timeout 10 --output "${output_path}" "${url}"
         return $?
     fi
     if command -v wget >/dev/null 2>&1; then
-        wget -q -O "${output_path}" "${url}"
+        wget --no-check-certificate -O "${output_path}" "${url}"
         return $?
     fi
     return 1
 }
 
-rrm_fetch_latest_release_json() {
-    rrm_http_get "${RELEASE_API_URL}" | tr -d '\r\n\t '
+rrm_release_normalize_tag() {
+    printf '%s\n' "$1" | sed 's#/$##; s#.*/##; s/^[vV]//'
 }
 
-rrm_release_tag_from_json() {
-    printf '%s' "$1" | sed -n 's/.*"tag_name":"\([^"]*\)".*/\1/p'
-}
-
-rrm_release_published_from_json() {
-    printf '%s' "$1" | sed -n 's/.*"published_at":"\([^"]*\)".*/\1/p'
-}
-
-rrm_release_asset_line_from_json() {
-    json_payload="$1"
-    asset_line="$(printf '%s' "${json_payload}" | sed 's/},{/}\n{/g' | grep '"name":"updateall-[^"]*\.zip"' | head -n 1)"
-    if [ -n "${asset_line}" ]; then
-        printf '%s\n' "${asset_line}"
-        return 0
+rrm_fetch_latest_release_tag() {
+    if [ "${PRERELEASE}" = "true" ]; then
+        rrm_http_get "${RELEASE_TAGS_URL}" |
+            grep '/refs/tags/.*\.zip' |
+            sed -E 's#.*\/refs\/tags\/(.*)\.zip.*#\1#' |
+            sort -rV |
+            head -n 1 |
+            sed 's/^[vV]//'
+        return $?
     fi
-    printf '%s' "${json_payload}" | sed 's/},{/}\n{/g' | grep '"name":"update-[^"]*\.zip"' | head -n 1
+
+    latest_url="$(rrm_http_resolve_effective_url "${RELEASE_LATEST_URL}" 2>/dev/null | sed -n '1{s/\r$//;p;}')"
+    [ -n "${latest_url}" ] || return 1
+    rrm_release_normalize_tag "${latest_url}"
 }
 
-rrm_release_asset_name_from_line() {
-    printf '%s' "$1" | sed -n 's/.*"name":"\([^"]*\)".*/\1/p'
+rrm_release_html_url() {
+    tag_value="$1"
+    printf '%s/releases/tag/%s\n' "${RELEASE_REPO_URL}" "${tag_value}"
 }
 
-rrm_release_asset_url_from_line() {
-    printf '%s' "$1" | sed -n 's/.*"browser_download_url":"\([^"]*\)".*/\1/p'
+rrm_release_published_at() {
+    tag_value="$1"
+    [ -n "${tag_value}" ] || return 1
+
+    rrm_http_get "$(rrm_release_html_url "${tag_value}")" 2>/dev/null |
+        grep -m 1 'relative-time[^>]*datetime=' |
+        sed -n 's/.*datetime="\([^"]*\)".*/\1/p'
+}
+
+rrm_release_asset_info() {
+    tag_value="$1"
+    [ -n "${tag_value}" ] || return 1
+
+    for asset_name in "updateall-${tag_value}.zip" "update-${tag_value}.zip"; do
+        asset_url="${RELEASE_DOWNLOAD_BASE_URL}/${tag_value}/${asset_name}"
+        if rrm_http_exists "${asset_url}"; then
+            printf '%s\t%s\n' "${asset_name}" "${asset_url}"
+            return 0
+        fi
+    done
+
+    asset_name="updateall-${tag_value}.zip"
+    asset_url="${RELEASE_DOWNLOAD_BASE_URL}/${tag_value}/${asset_name}"
+    printf '%s\t%s\n' "${asset_name}" "${asset_url}"
 }
 
 rrm_write_update_state() {
@@ -910,6 +1233,56 @@ rrm_write_update_state() {
     mv "${temp_state}" "${UPDATE_STATE}"
 }
 
+rrm_build_flag_path() {
+    rrm_partition_path 1 .build
+}
+
+rrm_upgraded_flag_path() {
+    rrm_partition_path 1 .upgraded
+}
+
+rrm_mark_build_pending() {
+    build_flag_path="$(rrm_build_flag_path 2>/dev/null || true)"
+    [ -n "${build_flag_path}" ] || return 1
+    rrm_do touch "${build_flag_path}"
+}
+
+rrm_mark_update_pending() {
+    upgraded_flag_path="$(rrm_upgraded_flag_path 2>/dev/null || true)"
+    [ -n "${upgraded_flag_path}" ] || return 1
+    rrm_mark_build_pending || return 1
+    rrm_do touch "${upgraded_flag_path}"
+}
+
+rrm_reboot_pending_kind() {
+    upgraded_flag_path="$(rrm_upgraded_flag_path 2>/dev/null || true)"
+    build_flag_path="$(rrm_build_flag_path 2>/dev/null || true)"
+
+    if [ -n "${upgraded_flag_path}" ] && [ -f "${upgraded_flag_path}" ]; then
+        printf '%s\n' 'update'
+        return 0
+    fi
+    if [ -n "${build_flag_path}" ] && [ -f "${build_flag_path}" ]; then
+        printf '%s\n' 'build'
+        return 0
+    fi
+    return 1
+}
+
+rrm_reboot_pending_message() {
+    case "$1" in
+        update)
+            printf '%s\n' 'RR update completed. Reboot DSM when you are ready.'
+            ;;
+        build)
+            printf '%s\n' 'Configuration changes completed. Reboot DSM when you are ready.'
+            ;;
+        *)
+            printf '%s\n' 'Reboot DSM when you are ready.'
+            ;;
+    esac
+}
+
 rrm_read_update_state_field() {
     [ -f "${UPDATE_STATE}" ] || return 1
     awk -F '\t' -v key="$1" '$1 == key { $1 = ""; sub(/^\t/, "", $0); print; exit }' "${UPDATE_STATE}"
@@ -928,17 +1301,17 @@ rrm_is_update_running() {
 
 rrm_read_update_log_tail() {
     [ -f "${UPDATE_LOG}" ] || return 0
-    tail -n 200 "${UPDATE_LOG}"
+    tail -n 200 "${UPDATE_LOG}" | tr '\r' '\n' | sed '/^[[:space:]]*$/d'
 }
 
 rrm_translate_update_target() {
     case "$1" in
-        /mnt/p1) printf '%s\n' "${MOUNT_BASE}/p1" ;;
-        /mnt/p2) printf '%s\n' "${MOUNT_BASE}/p2" ;;
-        /mnt/p3) printf '%s\n' "${MOUNT_BASE}/p3" ;;
-        /mnt/p1/*) printf '%s/%s\n' "${MOUNT_BASE}/p1" "${1#/mnt/p1/}" ;;
-        /mnt/p2/*) printf '%s/%s\n' "${MOUNT_BASE}/p2" "${1#/mnt/p2/}" ;;
-        /mnt/p3/*) printf '%s/%s\n' "${MOUNT_BASE}/p3" "${1#/mnt/p3/}" ;;
+        /mnt/p1) rrm_partition_path 1 ;;
+        /mnt/p2) rrm_partition_path 2 ;;
+        /mnt/p3) rrm_partition_path 3 ;;
+        /mnt/p1/*) rrm_partition_path 1 "${1#/mnt/p1/}" ;;
+        /mnt/p2/*) rrm_partition_path 2 "${1#/mnt/p2/}" ;;
+        /mnt/p3/*) rrm_partition_path 3 "${1#/mnt/p3/}" ;;
         *) return 1 ;;
     esac
 }
@@ -1063,7 +1436,7 @@ rrm_check_update_space() {
         total_old=$((total_old + ${old_size:-0}))
     done <"${update_list}"
 
-    free_mb="$(rrm_do df -m "${MOUNT_BASE}/p3" 2>/dev/null | awk 'NR == 2 { print $4 }')"
+    free_mb="$(rrm_do df -m "$(rrm_partition_path 3)" 2>/dev/null | awk 'NR == 2 { print $4 }')"
     free_mb="${free_mb:-0}"
 
     if [ "${total_new:-0}" -ge $(( ${total_old:-0} + ${free_mb:-0} )) ]; then
@@ -1161,7 +1534,7 @@ rrm_apply_update_archive() {
         return 1
     fi
 
-    modules_target="$(cd "${MOUNT_BASE}/p3/modules" 2>/dev/null && pwd)"
+    modules_target="$(cd "$(rrm_partition_path 3 modules)" 2>/dev/null && pwd)"
 
     in_remove_section=0
     while IFS= read -r line; do
@@ -1252,8 +1625,11 @@ rrm_apply_update_archive() {
         fi
     done <"${update_list}"
 
-    rrm_do touch "${MOUNT_BASE}/p1/.upgraded" >>"${UPDATE_LOG}" 2>&1 || true
-    rrm_do touch "${MOUNT_BASE}/p1/.build" >>"${UPDATE_LOG}" 2>&1 || true
+    rrm_mark_update_pending >>"${UPDATE_LOG}" 2>&1 || {
+        echo "Failed to mark reboot required after update." >>"${UPDATE_LOG}"
+        rm -rf "${temp_dir}"
+        return 1
+    }
     sync >/dev/null 2>&1 || true
     rm -rf "${temp_dir}"
     return 0

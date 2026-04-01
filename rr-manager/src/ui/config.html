@@ -14,8 +14,12 @@
                 <h2 data-i18n="config.title">user-config.yml</h2>
             </div>
         </div>
-        <div class="editorMeta" id="editorMeta" data-i18n="config.preparing">Preparing file reader...</div>
-        <textarea id="editor" spellcheck="false"></textarea>
+        <div class="editorShell">
+            <div class="editorGutter" aria-hidden="true">
+                <pre class="editorLineNumbers" id="editorLineNumbers">1</pre>
+            </div>
+            <textarea id="editor" spellcheck="false"></textarea>
+        </div>
         <div class="actionRow">
             <button id="reloadFile" type="button" data-i18n="common.reload">Reload</button>
             <button id="saveFile" type="button" data-i18n="config.save">Save To Bootloader</button>
