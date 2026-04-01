@@ -8,6 +8,7 @@
             'title.config': 'Config - RR Manager',
             'title.addons': 'addons - RR Manager',
             'title.modules': 'Modules - RR Manager',
+            'title.tools': 'Tools - RR Manager',
             'title.update': 'Update - RR Manager',
             'common.appName': 'RR Manager',
             'common.loading': 'Loading...',
@@ -38,6 +39,7 @@
             'nav.config': 'Config',
             'nav.addons': 'addons',
             'nav.modules': 'Modules',
+            'nav.tools': 'Tools',
             'nav.update': 'Update',
             'shell.eyebrow': 'DSM Bootloader Control',
             'shell.lead': 'Bootloader manager for RR.',
@@ -89,6 +91,9 @@
             'modules.save': 'Save Modules',
             'modules.filter': 'Filter',
             'modules.searchPlaceholder': 'Search module name or description',
+            'tools.eyebrow': 'Utilities',
+            'tools.title': 'Tools',
+            'tools.empty': 'This page is empty for now.',
             'config.eyebrow': 'Editor',
             'config.title': 'user-config.yml',
             'config.preparing': 'Preparing editor...',
@@ -128,6 +133,9 @@
             'update.unavailableTitle': 'Upgrade in progress',
             'update.unavailableBody': 'This page is unavailable while RR is upgrading.',
             'update.unavailableHint': 'Open the Update page to view progress and logs.',
+            'boot.unavailableTitle': 'Bootloader load failed',
+            'boot.unavailableBody': 'RR Manager cannot access the bootloader disk right now, so all functions are temporarily unavailable.',
+            'boot.unavailableHint': 'Check the synoboot1-3 mount state and try again.',
             'update.onlineStarted': 'Online update started.',
             'update.localStarted': 'Local update started.',
             'update.enterLocalPath': 'Enter a local update zip path first.',
@@ -145,6 +153,7 @@
             'title.config': '配置 - RR Manager',
             'title.addons': '插件 - RR Manager',
             'title.modules': '驱动 - RR Manager',
+            'title.tools': '工具 - RR Manager',
             'title.update': '更新 - RR Manager',
             'common.appName': 'RR Manager',
             'common.loading': '加载中...',
@@ -175,6 +184,7 @@
             'nav.config': '配置',
             'nav.addons': '插件',
             'nav.modules': '驱动',
+            'nav.tools': '工具',
             'nav.update': '更新',
             'shell.eyebrow': 'DSM 引导管理',
             'shell.lead': '在 DSM 中管理 RR 引导器。',
@@ -226,6 +236,9 @@
             'modules.save': '保存驱动',
             'modules.filter': '筛选',
             'modules.searchPlaceholder': '搜索驱动名称或描述',
+            'tools.eyebrow': '工具',
+            'tools.title': '工具',
+            'tools.empty': '此页面暂时为空。',
             'config.eyebrow': '编辑器',
             'config.title': 'user-config.yml',
             'config.preparing': '正在准备编辑器...',
@@ -265,6 +278,9 @@
             'update.unavailableTitle': '升级进行中',
             'update.unavailableBody': '升级期间，当前页面暂不可用。',
             'update.unavailableHint': '请切换到更新页查看进度和日志。',
+            'boot.unavailableTitle': '引导加载失败',
+            'boot.unavailableBody': 'RR Manager 当前无法访问引导盘，所有功能已临时冻结。',
+            'boot.unavailableHint': '请检查 synoboot1-3 挂载状态后重试。',
             'update.onlineStarted': '已启动在线升级。',
             'update.localStarted': '已启动本地升级。',
             'update.enterLocalPath': '请先输入本地更新 ZIP 路径。',
@@ -279,6 +295,8 @@
     var state = {
         release: null,
         updateRunning: false,
+        lastUpdateRunning: false,
+        lastUpdateState: '',
         upgradeBlocked: false,
         currentFile: 'user-config',
         configLoaded: false,
@@ -639,6 +657,13 @@
         banner.hidden = false;
     }
 
+    function showRebootBannerNow(message) {
+        syncRebootBanner({
+            updateState: 'pending-reboot',
+            updateMessage: message || t('common.rebootRequiredHint')
+        });
+    }
+
     function renderStats(items) {
         return items.map(function (item) {
             return '<div class="stat"><span class="statLabel">' + escapeHtml(item[0]) +
@@ -955,7 +980,35 @@
     }
 
     function pageUsesUpgradeBlock() {
-        return page !== 'shell' && page !== 'update';
+        return page !== 'shell';
+    }
+
+    function isBootloaderUnavailable(data) {
+        return !!(data && data.boot && data.boot.mountStatus === 'unavailable');
+    }
+
+    function upgradeBlockContent(data) {
+        if (isBootloaderUnavailable(data)) {
+            return {
+                eyebrow: t('common.boot'),
+                title: t('boot.unavailableTitle'),
+                body: t('boot.unavailableBody'),
+                statusItems: [
+                    [t('common.state'), t('boot.unavailableTitle')],
+                    [t('update.jobMessage'), (data.boot && data.boot.mountMessage) || t('boot.unavailableHint')]
+                ]
+            };
+        }
+
+        return {
+            eyebrow: t('update.stateEyebrow'),
+            title: t('update.unavailableTitle'),
+            body: t('update.unavailableBody'),
+            statusItems: [
+                [t('update.updateStateStat'), (data && data.updateState) || t('common.running')],
+                [t('update.jobMessage'), (data && data.updateMessage) || t('update.unavailableHint')]
+            ]
+        };
     }
 
     function ensureUpgradeBlockMask() {
@@ -981,9 +1034,8 @@
     }
 
     function setUpgradeBlocked(visible, data) {
+        var content;
         var mask;
-        var message;
-        var statusItems;
 
         if (!pageUsesUpgradeBlock()) {
             return false;
@@ -1000,16 +1052,12 @@
         }
 
         clearLoadingNow();
-        message = (data && data.updateMessage) || t('update.unavailableHint');
-        statusItems = [
-            [t('update.updateStateStat'), (data && data.updateState) || t('common.running')],
-            [t('update.jobMessage'), message]
-        ];
+        content = upgradeBlockContent(data);
 
-        $('upgradeBlockEyebrow').textContent = t('update.stateEyebrow');
-        $('upgradeBlockTitle').textContent = t('update.unavailableTitle');
-        $('upgradeBlockBody').textContent = t('update.unavailableBody');
-        $('upgradeBlockStatus').innerHTML = renderStatusLines(statusItems);
+        $('upgradeBlockEyebrow').textContent = content.eyebrow;
+        $('upgradeBlockTitle').textContent = content.title;
+        $('upgradeBlockBody').textContent = content.body;
+        $('upgradeBlockStatus').innerHTML = renderStatusLines(content.statusItems);
         mask.hidden = false;
         mask.style.display = 'flex';
         return true;
@@ -1023,6 +1071,10 @@
         }
 
         if (state.updateRunning) {
+            return setUpgradeBlocked(true, data);
+        }
+
+        if (isBootloaderUnavailable(data)) {
             return setUpgradeBlocked(true, data);
         }
 
@@ -1089,6 +1141,41 @@
                 }
                 throw error;
             });
+    }
+
+    function requestWithPageLoading(action, options, onSuccess) {
+        var key;
+        var requestOptions = {};
+        var silent;
+
+        options = options || {};
+        silent = !!options.silent;
+
+        for (key in options) {
+            if (Object.prototype.hasOwnProperty.call(options, key)) {
+                requestOptions[key] = options[key];
+            }
+        }
+        requestOptions.silent = true;
+
+        if (!silent) {
+            beginLoading(options.loadingMessage || t('common.loading'));
+        }
+
+        return request(action, requestOptions).then(function (data) {
+            try {
+                return onSuccess ? onSuccess(data) : data;
+            } finally {
+                if (!silent) {
+                    endLoading();
+                }
+            }
+        }, function (error) {
+            if (!silent) {
+                endLoading();
+            }
+            throw error;
+        });
     }
 
     function isBusyError(error) {
@@ -1184,10 +1271,34 @@
         var boot;
         var dmiSummary;
         var updateSummary;
+        var wasUpdateRunning = state.updateRunning;
+        var nextUpdateRunning = !!data.updateRunning;
+        var nextUpdateState = (data && data.updateState) || '';
 
-        clearLoadingNow();
-        state.updateRunning = !!data.updateRunning;
+        state.lastUpdateRunning = wasUpdateRunning;
+        state.lastUpdateState = nextUpdateState;
+        state.updateRunning = nextUpdateRunning;
         syncRebootBanner(data);
+
+        if (page === 'update' && wasUpdateRunning && !nextUpdateRunning && isRebootPendingState(nextUpdateState)) {
+            showRebootBannerNow(data.updateMessage || t('common.rebootRequiredHint'));
+            setToast(withRebootHint(data.updateMessage || t('common.saved')), 'success');
+        }
+
+        if (syncUpgradeBlocked(data)) {
+            if (page === 'update') {
+                if ($('startLocalUpdate')) {
+                    $('startLocalUpdate').disabled = true;
+                }
+                if ($('startOnlineUpdate')) {
+                    $('startOnlineUpdate').disabled = true;
+                }
+                if ($('checkRelease')) {
+                    $('checkRelease').disabled = true;
+                }
+            }
+            return;
+        }
 
         if (page === 'update') {
             updateSummary = data.updateMessage || t('common.ready');
@@ -1210,10 +1321,6 @@
             if ($('checkRelease')) {
                 $('checkRelease').disabled = data.updateRunning;
             }
-            return;
-        }
-
-        if (syncUpgradeBlocked(data)) {
             return;
         }
 
@@ -1258,7 +1365,6 @@
     }
 
     function renderRelease(data) {
-        clearLoadingNow();
         state.release = data;
         $('releaseBox').innerHTML =
             '<div class="stat"><span class="statLabel">' + escapeHtml(t('update.currentVersionRelease')) + '</span><span class="statValue">' + escapeHtml(displayValue(data.currentVersion)) + '</span></div>' +
@@ -1272,7 +1378,10 @@
     }
 
     function loadOverview(options) {
-        return request('overview', options).then(renderOverview).catch(function (error) {
+        return requestWithPageLoading('overview', options, function (data) {
+            renderOverview(data);
+            return data;
+        }).catch(function (error) {
             if (isBusyError(error)) {
                 setBusyLoading(t(page === 'update' ? 'update.loadingState' : 'update.loadingBoot'));
                 scheduleBusyRetry('overview', function () {
@@ -1285,24 +1394,25 @@
     }
 
     function loadRelease(options) {
-        if (state.updateRunning) {
+        if (state.updateRunning || state.upgradeBlocked) {
             clearBusyRetry('release');
             return Promise.resolve();
         }
 
-        return request('release', options).then(function (data) {
+        return requestWithPageLoading('release', options, function (data) {
             if (isRetryBusyResult(data)) {
                 if (state.updateRunning) {
                     clearBusyRetry('release');
-                    return;
+                    return data;
                 }
                 setBusyLoading(t('update.loadingRelease'));
                 scheduleBusyRetry('release', function () {
                     loadRelease({ silent: true });
                 });
-                return;
+                return data;
             }
             renderRelease(data);
+            return data;
         }).catch(function (error) {
             if (isBusyError(error)) {
                 if (state.updateRunning) {
@@ -1320,9 +1430,9 @@
     }
 
     function refreshLog(options) {
-        request('log', options).then(function (data) {
-            clearLoadingNow();
+        return requestWithPageLoading('log', options, function (data) {
             $('logView').textContent = data.log || t('update.noLog');
+            return data;
         }).catch(function (error) {
             if (isBusyError(error)) {
                 setBusyLoading(t('update.loadingLog'));
@@ -1378,7 +1488,7 @@
         loadOverview();
         (function pollOverview() {
             loadOverview({ silent: true });
-            setTimeout(pollOverview, state.updateRunning ? 4000 : 12000);
+            setTimeout(pollOverview, state.updateRunning ? 1000 : 12000);
         })();
     }
 
@@ -1395,14 +1505,17 @@
         $('startOnlineUpdate').addEventListener('click', startOnlineUpdate);
         $('startLocalUpdate').addEventListener('click', startLocalUpdate);
 
-        loadOverview();
-        loadRelease();
+        loadOverview().then(function () {
+            if (!state.upgradeBlocked) {
+                loadRelease();
+            }
+        });
         refreshLog();
 
         (function pollUpdate() {
             loadOverview({ silent: true });
             refreshLog({ silent: true });
-            setTimeout(pollUpdate, state.updateRunning ? 4000 : 12000);
+            setTimeout(pollUpdate, state.updateRunning ? 1000 : 12000);
         })();
     }
 
@@ -1452,17 +1565,17 @@
 
     function loadItems(options) {
         var cfg = itemPageConfig();
-        request(cfg.loadAction, options).then(function (data) {
+        return requestWithPageLoading(cfg.loadAction, options, function (data) {
             if (isRetryBusyResult(data)) {
                 setBusyLoading(t('common.loading'));
                 scheduleBusyRetry('items', function () {
                     loadItems({ silent: true });
                 });
-                return;
+                return data;
             }
-            clearLoadingNow();
             state.items = data.items || [];
             renderItems();
+            return data;
         }).catch(function (error) {
             if (isBusyError(error)) {
                 setBusyLoading(t('common.loading'));
@@ -1508,7 +1621,9 @@
             method: 'POST',
             data: { items: selected.join(',') }
         }).then(function (data) {
+            showRebootBannerNow(data.message || t('common.saved'));
             setToast(withRebootHint(data.message || t('common.saved')), 'success');
+            loadOverview({ silent: true });
             loadItems();
         }).catch(function (error) {
             if (isBusyError(error)) {
@@ -1579,7 +1694,7 @@
         $('searchInput').addEventListener('input', renderItems);
 
         (function watchAvailability(initialized) {
-            request('overview', initialized ? { silent: true } : undefined).then(function (data) {
+            request('overview', { silent: true }).then(function (data) {
                 var wasBlocked = state.upgradeBlocked;
                 syncRebootBanner(data);
                 var blocked = syncUpgradeBlocked(data);
@@ -1608,27 +1723,36 @@
     }
 
     function loadFile(options) {
+        var requestOptions;
+        var key;
+
         state.configLoaded = false;
         if ($('saveFile')) {
             $('saveFile').disabled = true;
         }
         options = options || {};
-        options.data = { file: state.currentFile };
-        return request('read', options).then(function (data) {
+        requestOptions = {};
+        for (key in options) {
+            if (Object.prototype.hasOwnProperty.call(options, key)) {
+                requestOptions[key] = options[key];
+            }
+        }
+        requestOptions.data = { file: state.currentFile };
+        return requestWithPageLoading('read', requestOptions, function (data) {
             if (isRetryBusyResult(data)) {
                 setBusyLoading(t('common.loading'));
                 scheduleBusyRetry('file', function () {
                     loadFile({ silent: true });
                 });
-                return;
+                return data;
             }
-            clearLoadingNow();
             state.configLoaded = true;
             if ($('saveFile')) {
                 $('saveFile').disabled = false;
             }
             $('editor').value = data.content || '';
             updateEditorLineNumbers();
+            return data;
         }).catch(function (error) {
             if (isBusyError(error)) {
                 setBusyLoading(t('common.loading'));
@@ -1659,7 +1783,9 @@
                 content: $('editor').value
             }
         }).then(function (data) {
+            showRebootBannerNow(data.message || t('common.saved'));
             setToast(withRebootHint(data.message || t('common.saved')), 'success');
+            loadOverview({ silent: true });
             loadFile();
         }).catch(function (error) {
             if (isBusyError(error)) {
@@ -1681,7 +1807,7 @@
         $('saveFile').addEventListener('click', saveFile);
 
         (function watchAvailability(initialized) {
-            request('overview', initialized ? { silent: true } : undefined).then(function (data) {
+            request('overview', { silent: true }).then(function (data) {
                 var wasBlocked = state.upgradeBlocked;
                 syncRebootBanner(data);
                 var blocked = syncUpgradeBlocked(data);

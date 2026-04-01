@@ -255,6 +255,10 @@ collect_overview() {
             mounted_version="$(rrm_current_version 2>/dev/null || true)"
             [ -n "${mounted_version}" ] && version_value="${mounted_version}"
             reboot_pending_kind="$(rrm_reboot_pending_kind 2>/dev/null || true)"
+            if rrm_reset_update_tracking_if_reboot_cleared "${state_value}" >/dev/null 2>&1; then
+                state_value='idle'
+                message_value='Ready.'
+            fi
             if [ -n "${config_path}" ] && [ -f "${config_path}" ]; then
                 boot_type_raw="$(rrm_yaml_scalar_value dt "${config_path}" 2>/dev/null || true)"
                 boot_model="$(rrm_yaml_scalar_value model "${config_path}" 2>/dev/null || printf 'unknown')"
@@ -360,8 +364,8 @@ read_file_action() {
     path_value="$(rrm_managed_file_path "${file_id}" 2>/dev/null || true)"
     release_locked_mount
 
-    if [ -z "${content}" ] && [ ! -f "${path_value}" ]; then
-        send_error 404 "The selected file was not found on the bootloader partition."
+    if [ -z "${path_value}" ]; then
+        send_error 500 "Unable to resolve the selected bootloader file path."
         return
     fi
 

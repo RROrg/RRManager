@@ -1233,6 +1233,16 @@ rrm_write_update_state() {
     mv "${temp_state}" "${UPDATE_STATE}"
 }
 
+rrm_clear_update_log() {
+    rrm_ensure_dirs
+    : >"${UPDATE_LOG}"
+}
+
+rrm_reset_update_tracking() {
+    rrm_write_update_state "idle" "Ready." "" ""
+    rrm_clear_update_log
+}
+
 rrm_build_flag_path() {
     rrm_partition_path 1 .build
 }
@@ -1283,9 +1293,31 @@ rrm_reboot_pending_message() {
     esac
 }
 
+rrm_reset_update_tracking_if_reboot_cleared() {
+    current_state="$1"
+
+    rrm_is_update_running && return 1
+    if rrm_reboot_pending_kind >/dev/null 2>&1; then
+        return 1
+    fi
+
+    if [ -z "${current_state}" ]; then
+        current_state="$(rrm_read_update_state_field state 2>/dev/null || true)"
+    fi
+
+    case "${current_state}" in
+        success|pending-reboot|reboot-required)
+            rrm_reset_update_tracking
+            return 0
+            ;;
+    esac
+
+    return 1
+}
+
 rrm_read_update_state_field() {
     [ -f "${UPDATE_STATE}" ] || return 1
-    awk -F '\t' -v key="$1" '$1 == key { $1 = ""; sub(/^\t/, "", $0); print; exit }' "${UPDATE_STATE}"
+    awk -F '\t' -v key="$1" '$1 == key { print substr($0, index($0, FS) + length(FS)); exit }' "${UPDATE_STATE}"
 }
 
 rrm_is_update_running() {
