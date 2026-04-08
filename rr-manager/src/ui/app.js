@@ -1,299 +1,11 @@
 (function () {
     var page = document.body.getAttribute('data-page');
-    var I18N = {
-        en: {
-            'title.shell': 'RR Manager',
-            'title.overview': 'Overview - RR Manager',
-            'title.hardware': 'Hardware - RR Manager',
-            'title.config': 'Config - RR Manager',
-            'title.addons': 'addons - RR Manager',
-            'title.modules': 'Modules - RR Manager',
-            'title.tools': 'Tools - RR Manager',
-            'title.update': 'Update - RR Manager',
-            'common.appName': 'RR Manager',
-            'common.loading': 'Loading...',
-            'common.refresh': 'Refresh',
-            'common.reload': 'Reload',
-            'common.save': 'Save',
-            'common.saved': 'Saved successfully.',
-            'common.rebootPending': 'pending reboot',
-            'common.rebootRequiredHint': 'Reboot DSM when you are ready.',
-            'common.unknown': 'unknown',
-            'common.idle': 'idle',
-            'common.running': 'running',
-            'common.busy': 'busy',
-            'common.ready': 'Ready.',
-            'common.present': 'present',
-            'common.yes': 'yes',
-            'common.no': 'no',
-            'common.state': 'State',
-            'common.hardware': 'Hardware',
-            'common.boot': 'Boot',
-            'common.loader': 'Loader',
-            'common.pleaseWait': 'Please wait',
-            'common.noItems': 'No items found.',
-            'common.noLog': 'No log output yet.',
-            'common.readFailed': 'Read failed.',
-            'nav.overview': 'Overview',
-            'nav.hardware': 'Hardware',
-            'nav.config': 'Config',
-            'nav.addons': 'addons',
-            'nav.modules': 'Modules',
-            'nav.tools': 'Tools',
-            'nav.update': 'Update',
-            'shell.eyebrow': 'DSM Bootloader Control',
-            'shell.lead': 'Bootloader manager for RR.',
-            'shell.logoAria': 'RR Logo',
-            'shell.logoAlt': 'RR Logo',
-            'shell.contentTitle': 'RR Manager Content',
-            'shell.languageAria': 'Language',
-            'overview.deviceEyebrow': 'Hardware',
-            'overview.deviceTitle': 'Device Info',
-            'overview.bootEyebrow': 'Bootloader',
-            'overview.bootTitle': 'Boot Info',
-            'overview.dmi': 'DMI',
-            'overview.deviceType': 'Type',
-            'overview.cpu': 'CPU',
-            'overview.memory': 'Memory',
-            'overview.dmiVendor': 'DMI Vendor',
-            'overview.product': 'Product',
-            'overview.productVersion': 'Product Version',
-            'overview.bios': 'BIOS',
-            'overview.cpuCores': 'CPU Cores',
-            'overview.currentVersion': 'Current RR Version',
-            'overview.diskType': 'Disk Type',
-            'overview.bootModel': 'Model',
-            'overview.bootVersion': 'Version',
-            'overview.bootKernel': 'Kernel',
-            'overview.bootLkm': 'LKM',
-            'overview.bootMev': 'MEV',
-            'overview.bootAuth': 'Auth',
-            'hardware.pciEyebrow': 'PCI Hardware',
-            'hardware.pciTitle': 'PCI Devices / Drivers',
-            'hardware.pciPath': 'PCI Path',
-            'hardware.pciType': 'Type',
-            'hardware.pciDevice': 'Device',
-            'hardware.pciVidPid': 'VID:PID',
-            'hardware.pciDriver': 'Driver',
-            'hardware.pciEmpty': 'No PCI device data found.',
-            'hardware.usbEyebrow': 'USB Hardware',
-            'hardware.usbTitle': 'USB Devices',
-            'hardware.usbBus': 'Bus',
-            'hardware.usbDevice': 'Device',
-            'hardware.usbVidPid': 'VID:PID',
-            'hardware.usbName': 'Name',
-            'hardware.usbEmpty': 'No USB device data found.',
-            'addons.eyebrow': 'addons',
-            'addons.save': 'Save addons',
-            'addons.filter': 'Filter',
-            'addons.searchPlaceholder': 'Search addons by name or description',
-            'modules.eyebrow': 'Kernel',
-            'modules.save': 'Save Modules',
-            'modules.filter': 'Filter',
-            'modules.searchPlaceholder': 'Search module name or description',
-            'tools.eyebrow': 'Utilities',
-            'tools.title': 'Tools',
-            'tools.empty': 'This page is empty for now.',
-            'config.eyebrow': 'Editor',
-            'config.title': 'user-config.yml',
-            'config.preparing': 'Preparing editor...',
-            'config.save': 'Save To Bootloader',
-            'config.loadingFile': 'Loading {file} ...',
-            'update.stateEyebrow': 'Status',
-            'update.overviewTitle': 'Update Overview',
-            'update.releaseEyebrow': 'Release',
-            'update.upgradeTitle': 'Upgrade RR',
-            'update.checkRelease': 'Check Release',
-            'update.noReleaseData': 'No release data loaded.',
-            'update.upgradeOnline': 'Upgrade Online',
-            'update.localPath': 'Local ZIP Path',
-            'update.localPathPlaceholder': '/volume1/public/updateall-xx.zip',
-            'update.upgradeLocal': 'Upgrade Local',
-            'update.logEyebrow': 'Job Log',
-            'update.logTitle': 'Update Log',
-            'update.refreshLog': 'Refresh Log',
-            'update.noLog': 'No log output yet.',
-            'update.currentVersion': 'Current RR version',
-            'update.updateState': 'Update state',
-            'update.backgroundJob': 'Background job',
-            'update.currentVersionStat': 'Current RR Version',
-            'update.updateStateStat': 'Update State',
-            'update.lockStat': 'RR Manager Lock',
-            'update.jobMessage': 'Job Message',
-            'update.currentVersionRelease': 'Current Version',
-            'update.latestVersionRelease': 'Latest Version',
-            'update.publishedAt': 'Published At',
-            'update.asset': 'Asset',
-            'update.github': 'GitHub',
-            'update.noAsset': 'no update asset found',
-            'update.loadingBoot': 'Loading boot information...',
-            'update.loadingRelease': 'Loading release information...',
-            'update.loadingLog': 'Loading job log...',
-            'update.loadingState': 'Loading update state...',
-            'update.unavailableTitle': 'Upgrade in progress',
-            'update.unavailableBody': 'This page is unavailable while RR is upgrading.',
-            'update.unavailableHint': 'Open the Update page to view progress and logs.',
-            'boot.unavailableTitle': 'Bootloader load failed',
-            'boot.unavailableBody': 'RR Manager cannot access the bootloader disk right now, so all functions are temporarily unavailable.',
-            'boot.unavailableHint': 'Check the synoboot1-3 mount state and try again.',
-            'update.onlineStarted': 'Online update started.',
-            'update.localStarted': 'Local update started.',
-            'update.enterLocalPath': 'Enter a local update zip path first.',
-            'table.name': 'Name',
-            'table.description': 'Description',
-            'table.system': 'System',
-            'table.enable': 'Enable',
-            'error.badJsonPrefix': 'API did not return JSON. First bytes: {text}',
-            'error.requestFailed': 'Request failed.'
-        },
-        'zh-CN': {
-            'title.shell': 'RR Manager',
-            'title.overview': '概览 - RR Manager',
-            'title.hardware': '硬件 - RR Manager',
-            'title.config': '配置 - RR Manager',
-            'title.addons': '插件 - RR Manager',
-            'title.modules': '驱动 - RR Manager',
-            'title.tools': '工具 - RR Manager',
-            'title.update': '更新 - RR Manager',
-            'common.appName': 'RR Manager',
-            'common.loading': '加载中...',
-            'common.refresh': '刷新',
-            'common.reload': '重新载入',
-            'common.save': '保存',
-            'common.saved': '保存成功。',
-            'common.rebootPending': '待重启',
-            'common.rebootRequiredHint': '可在方便时重启 DSM。',
-            'common.unknown': '未知',
-            'common.idle': '空闲',
-            'common.running': '运行中',
-            'common.busy': '忙碌',
-            'common.ready': '就绪。',
-            'common.present': '存在',
-            'common.yes': '是',
-            'common.no': '否',
-            'common.state': '状态',
-            'common.hardware': '硬件',
-            'common.boot': '引导',
-            'common.loader': '加载器',
-            'common.pleaseWait': '请稍候',
-            'common.noItems': '没有可显示的项目。',
-            'common.noLog': '暂无日志输出。',
-            'common.readFailed': '读取失败。',
-            'nav.overview': '概览',
-            'nav.hardware': '硬件',
-            'nav.config': '配置',
-            'nav.addons': '插件',
-            'nav.modules': '驱动',
-            'nav.tools': '工具',
-            'nav.update': '更新',
-            'shell.eyebrow': 'DSM 引导管理',
-            'shell.lead': '在 DSM 中管理 RR 引导器。',
-            'shell.logoAria': 'RR 标志',
-            'shell.logoAlt': 'RR 标志',
-            'shell.contentTitle': 'RR Manager 内容',
-            'shell.languageAria': '语言',
-            'overview.deviceEyebrow': '硬件',
-            'overview.deviceTitle': '设备信息',
-            'overview.bootEyebrow': '引导器',
-            'overview.bootTitle': '引导信息',
-            'overview.dmi': 'DMI',
-            'overview.deviceType': '类型',
-            'overview.cpu': 'CPU',
-            'overview.memory': '内存',
-            'overview.dmiVendor': 'DMI 厂商',
-            'overview.product': '设备型号',
-            'overview.productVersion': '设备版本',
-            'overview.bios': 'BIOS',
-            'overview.cpuCores': 'CPU 核心数',
-            'overview.currentVersion': '当前 RR 版本',
-            'overview.diskType': '磁盘类型',
-            'overview.bootModel': '机型',
-            'overview.bootVersion': '版本',
-            'overview.bootKernel': '内核',
-            'overview.bootLkm': 'LKM',
-            'overview.bootMev': 'MEV',
-            'overview.bootAuth': '鉴权信息',
-            'hardware.pciEyebrow': 'PCI 硬件',
-            'hardware.pciTitle': 'PCI 设备',
-            'hardware.pciPath': 'PCI 路径',
-            'hardware.pciType': '类型',
-            'hardware.pciDevice': '设备',
-            'hardware.pciVidPid': 'VID:PID',
-            'hardware.pciDriver': '驱动',
-            'hardware.pciEmpty': '未获取到 PCI 设备信息。',
-            'hardware.usbEyebrow': 'USB 硬件',
-            'hardware.usbTitle': 'USB 设备',
-            'hardware.usbBus': '总线',
-            'hardware.usbDevice': '设备',
-            'hardware.usbVidPid': 'VID:PID',
-            'hardware.usbName': '名称',
-            'hardware.usbEmpty': '未获取到 USB 设备信息。',
-            'addons.eyebrow': '插件',
-            'addons.save': '保存插件',
-            'addons.filter': '筛选',
-            'addons.searchPlaceholder': '搜索插件名称或描述',
-            'modules.eyebrow': '内核',
-            'modules.save': '保存驱动',
-            'modules.filter': '筛选',
-            'modules.searchPlaceholder': '搜索驱动名称或描述',
-            'tools.eyebrow': '工具',
-            'tools.title': '工具',
-            'tools.empty': '此页面暂时为空。',
-            'config.eyebrow': '编辑器',
-            'config.title': 'user-config.yml',
-            'config.preparing': '正在准备编辑器...',
-            'config.save': '保存到引导器',
-            'config.loadingFile': '正在加载 {file} ...',
-            'update.stateEyebrow': '状态',
-            'update.overviewTitle': '更新概览',
-            'update.releaseEyebrow': '发行版本',
-            'update.upgradeTitle': '升级 RR',
-            'update.checkRelease': '检查版本',
-            'update.noReleaseData': '尚未加载版本信息。',
-            'update.upgradeOnline': '在线升级',
-            'update.localPath': '本地 ZIP 路径',
-            'update.localPathPlaceholder': '/volume1/public/updateall-xx.zip',
-            'update.upgradeLocal': '本地升级',
-            'update.logEyebrow': '任务日志',
-            'update.logTitle': '更新日志',
-            'update.refreshLog': '刷新日志',
-            'update.noLog': '暂无日志输出。',
-            'update.currentVersion': '当前 RR 版本',
-            'update.updateState': '更新状态',
-            'update.backgroundJob': '后台任务',
-            'update.currentVersionStat': '当前 RR 版本',
-            'update.updateStateStat': '更新状态',
-            'update.lockStat': 'RR Manager 锁',
-            'update.jobMessage': '任务消息',
-            'update.currentVersionRelease': '当前版本',
-            'update.latestVersionRelease': '最新版本',
-            'update.publishedAt': '发布时间',
-            'update.asset': '资源文件',
-            'update.github': 'GitHub',
-            'update.noAsset': '未找到更新资源',
-            'update.loadingBoot': '正在加载引导信息...',
-            'update.loadingRelease': '正在加载版本信息...',
-            'update.loadingLog': '正在加载任务日志...',
-            'update.loadingState': '正在加载更新状态...',
-            'update.unavailableTitle': '升级进行中',
-            'update.unavailableBody': '升级期间，当前页面暂不可用。',
-            'update.unavailableHint': '请切换到更新页查看进度和日志。',
-            'boot.unavailableTitle': '引导加载失败',
-            'boot.unavailableBody': 'RR Manager 当前无法访问引导盘，所有功能已临时冻结。',
-            'boot.unavailableHint': '请检查 synoboot1-3 挂载状态后重试。',
-            'update.onlineStarted': '已启动在线升级。',
-            'update.localStarted': '已启动本地升级。',
-            'update.enterLocalPath': '请先输入本地更新 ZIP 路径。',
-            'table.name': '名称',
-            'table.description': '描述',
-            'table.system': '系统',
-            'table.enable': '启用',
-            'error.badJsonPrefix': 'API 未返回 JSON，前几个字符: {text}',
-            'error.requestFailed': '请求失败。'
-        }
-    };
     var state = {
-        release: null,
+        updateReleases: {
+            rr: null,
+            rrm: null
+        },
+        shellSummary: null,
         updateRunning: false,
         lastUpdateRunning: false,
         lastUpdateState: '',
@@ -331,20 +43,40 @@
         'zh-HK': 'cht',
         'zh-TW': 'cht'
     };
-    I18N['en-US'] = I18N.en;
-    I18N['ar-SA'] = I18N.en;
-    I18N['de-DE'] = I18N.en;
-    I18N['es-ES'] = I18N.en;
-    I18N['fr-FR'] = I18N.en;
-    I18N['ja-JP'] = I18N.en;
-    I18N['ko-KR'] = I18N.en;
-    I18N['ru-RU'] = I18N.en;
-    I18N['th-TH'] = I18N.en;
-    I18N['tr-TR'] = I18N.en;
-    I18N['uk-UA'] = I18N.en;
-    I18N['vi-VN'] = I18N.en;
-    I18N['zh-TW'] = I18N['zh-CN'];
-    I18N['zh-HK'] = I18N['zh-CN'];
+    var UPDATE_VARIANTS = {
+        rr: {
+            releaseAction: 'release',
+            retryKey: 'release',
+            loadingKey: 'update.loadingRelease',
+            releaseBoxId: 'releaseBox',
+            checkButtonId: 'checkRelease',
+            onlineButtonId: 'startOnlineUpdate',
+            localButtonId: 'startLocalUpdate',
+            localInputId: 'localArchivePath',
+            localPathErrorKey: 'update.enterLocalPath',
+            onlineAction: 'start-update-online',
+            localAction: 'start-update-local',
+            onlineSuccessKey: 'update.onlineStarted',
+            localSuccessKey: 'update.localStarted',
+            silentLogRefresh: false
+        },
+        rrm: {
+            releaseAction: 'rrm-release',
+            retryKey: 'rrm-release',
+            loadingKey: 'update.loadingRrmRelease',
+            releaseBoxId: 'rrmReleaseBox',
+            checkButtonId: 'checkRrmRelease',
+            onlineButtonId: 'startRrmOnlineUpdate',
+            localButtonId: 'startRrmLocalUpdate',
+            localInputId: 'rrmLocalPackagePath',
+            localPathErrorKey: 'update.enterRrmLocalPath',
+            onlineAction: 'start-rrm-update-online',
+            localAction: 'start-rrm-update-local',
+            onlineSuccessKey: 'update.rrmOnlineStarted',
+            localSuccessKey: 'update.rrmLocalStarted',
+            silentLogRefresh: true
+        }
+    };
 
     function $(id) {
         return document.getElementById(id);
@@ -440,6 +172,10 @@
         return LOCALE_DIRS[locale] || 'enu';
     }
 
+    function updateVariantConfig(kind) {
+        return UPDATE_VARIANTS[kind] || UPDATE_VARIANTS.rr;
+    }
+
     function mergeMessages(base, extra) {
         var merged = {};
         var key;
@@ -457,6 +193,15 @@
         return merged;
     }
 
+    function decodeUtf8Response(response) {
+        return response.arrayBuffer().then(function (buffer) {
+            if (typeof TextDecoder === 'function') {
+                return new TextDecoder('utf-8').decode(buffer);
+            }
+            return String.fromCharCode.apply(null, new Uint8Array(buffer));
+        });
+    }
+
     function fetchMessages(dir) {
         return fetch('/webman/3rdparty/rr-manager/texts/' + dir + '/ui.json', {
             credentials: 'same-origin',
@@ -465,7 +210,9 @@
             if (!response.ok) {
                 throw new Error('Failed to load locale bundle.');
             }
-            return response.json();
+            return decodeUtf8Response(response).then(function (text) {
+                return JSON.parse(text);
+            });
         });
     }
 
@@ -498,15 +245,15 @@
         if (state.baseMessages) {
             return state.baseMessages;
         }
-        return I18N[state.locale] || I18N['en-US'] || I18N.en;
+        return {};
     }
 
     function t(key, vars) {
         var value = currentDictionary()[key];
         var name;
 
-        if (value == null) {
-            value = I18N['en-US'][key] || I18N.en[key];
+        if (value == null && state.baseMessages) {
+            value = state.baseMessages[key];
         }
         if (value == null) {
             value = key;
@@ -677,22 +424,6 @@
             return '<div class="statusLine"><span class="statusLabel">' + escapeHtml(item[0]) +
                 '</span><span class="statusValue">' + escapeHtml(displayValue(item[1])) + '</span></div>';
         }).join('');
-    }
-
-    function formatBootAuth(boot) {
-        var values = [];
-
-        if (boot.sn && boot.sn !== 'unknown') {
-            values.push('SN: ' + boot.sn);
-        }
-        if (boot.mac1 && boot.mac1 !== 'unknown') {
-            values.push('MAC1: ' + boot.mac1);
-        }
-        if (boot.mac2 && boot.mac2 !== 'unknown') {
-            values.push('MAC2: ' + boot.mac2);
-        }
-
-        return values.length ? values.join(' | ') : t('common.unknown');
     }
 
     function formatCpuCt(hardware) {
@@ -980,14 +711,30 @@
     }
 
     function pageUsesUpgradeBlock() {
-        return page !== 'shell';
+        return page !== 'shell' && page !== 'update';
     }
 
     function isBootloaderUnavailable(data) {
         return !!(data && data.boot && data.boot.mountStatus === 'unavailable');
     }
 
+    function isUnsupportedBootloader(data) {
+        return !!(data && data.boot && data.boot.mountStatus === 'unsupported');
+    }
+
     function upgradeBlockContent(data) {
+        if (isUnsupportedBootloader(data)) {
+            return {
+                eyebrow: t('common.boot'),
+                title: t('boot.unsupportedTitle'),
+                body: t('boot.unsupportedBody'),
+                statusItems: [
+                    [t('common.state'), t('boot.unsupportedTitle')],
+                    [t('update.jobMessage'), (data.boot && data.boot.mountMessage) || t('boot.unsupportedHint')]
+                ]
+            };
+        }
+
         if (isBootloaderUnavailable(data)) {
             return {
                 eyebrow: t('common.boot'),
@@ -1074,6 +821,10 @@
             return setUpgradeBlocked(true, data);
         }
 
+        if (isUnsupportedBootloader(data)) {
+            return setUpgradeBlocked(true, data);
+        }
+
         if (isBootloaderUnavailable(data)) {
             return setUpgradeBlocked(true, data);
         }
@@ -1110,7 +861,7 @@
 
         return fetch(url, fetchOptions)
             .then(function (response) {
-                return response.text().then(function (text) {
+                return decodeUtf8Response(response).then(function (text) {
                     var json;
                     try {
                         json = JSON.parse(text);
@@ -1163,18 +914,32 @@
         }
 
         return request(action, requestOptions).then(function (data) {
-            try {
-                return onSuccess ? onSuccess(data) : data;
-            } finally {
+            return Promise.resolve(onSuccess ? onSuccess(data) : data).then(function (result) {
                 if (!silent) {
-                    endLoading();
+                    return waitForNextPaint().then(function () {
+                        endLoading();
+                        return result;
+                    });
                 }
-            }
+                return result;
+            });
         }, function (error) {
             if (!silent) {
                 endLoading();
             }
             throw error;
+        });
+    }
+
+    function waitForNextPaint() {
+        return new Promise(function (resolve) {
+            if (typeof requestAnimationFrame !== 'function') {
+                setTimeout(resolve, 0);
+                return;
+            }
+            requestAnimationFrame(function () {
+                requestAnimationFrame(resolve);
+            });
         });
     }
 
@@ -1184,6 +949,35 @@
 
     function isRetryBusyResult(data) {
         return !!(data && data.busy && data.retry);
+    }
+
+    function hasResolvedBootIdentity(boot) {
+        if (!boot) {
+            return false;
+        }
+
+        return [boot.model, boot.version, boot.lkm, boot.mev, boot.sn, boot.mac1, boot.mac2].some(function (value) {
+            return value && value !== 'unknown';
+        });
+    }
+
+    function shouldHoldOverviewLoading(data) {
+        var boot;
+
+        if (page !== 'overview' && page !== 'hardware') {
+            return false;
+        }
+
+        if (!data || data.updateRunning || isUnsupportedBootloader(data) || isBootloaderUnavailable(data)) {
+            return false;
+        }
+
+        boot = data.boot || {};
+        if (boot.mountStatus && boot.mountStatus !== 'ready') {
+            return false;
+        }
+
+        return !hasResolvedBootIdentity(boot);
     }
 
     function renderLoadingStats(items) {
@@ -1261,16 +1055,48 @@
 
         if (localeSelect) {
             localeSelect.addEventListener('change', function () {
-                setLocale(localeSelect.value, { reloadFrame: true });
+                setLocale(localeSelect.value, { reloadFrame: true }).then(function () {
+                    renderShellSummary(state.shellSummary);
+                });
             });
         }
+
+        renderShellSummary(null);
+        loadShellSummary({ silent: true });
+    }
+
+    function renderShellSummary(data) {
+        var target = $('shellVersionSummary');
+        var rrmVersion;
+        var rrVersion;
+
+        if (!target) {
+            return;
+        }
+
+        rrmVersion = (data && data.currentPackageVersion) || 'X';
+        rrVersion = (data && data.currentVersion) || 'X';
+        target.textContent = '[RRM v' + rrmVersion + '] [RR v' + rrVersion + ']';
+    }
+
+    function loadShellSummary(options) {
+        return requestWithPageLoading('overview', options, function (data) {
+            state.shellSummary = data || null;
+            renderShellSummary(state.shellSummary);
+            return data;
+        }).catch(function (error) {
+            renderShellSummary(state.shellSummary);
+            if (isBusyError(error)) {
+                return;
+            }
+            setToast(error.message, 'error');
+        });
     }
 
     function renderOverview(data) {
         var hardware;
         var boot;
         var dmiSummary;
-        var updateSummary;
         var wasUpdateRunning = state.updateRunning;
         var nextUpdateRunning = !!data.updateRunning;
         var nextUpdateState = (data && data.updateState) || '';
@@ -1287,6 +1113,15 @@
 
         if (syncUpgradeBlocked(data)) {
             if (page === 'update') {
+                if ($('startRrmLocalUpdate')) {
+                    $('startRrmLocalUpdate').disabled = true;
+                }
+                if ($('startRrmOnlineUpdate')) {
+                    $('startRrmOnlineUpdate').disabled = true;
+                }
+                if ($('checkRrmRelease')) {
+                    $('checkRrmRelease').disabled = true;
+                }
                 if ($('startLocalUpdate')) {
                     $('startLocalUpdate').disabled = true;
                 }
@@ -1301,26 +1136,19 @@
         }
 
         if (page === 'update') {
-            updateSummary = data.updateMessage || t('common.ready');
             $('overviewStats').innerHTML = renderStats([
-                [t('update.jobMessage'), updateSummary],
+                [t('update.jobMessage'), data.updateMessage || t('common.ready')],
                 [t('update.backgroundJob'), data.updateRunning ? t('common.running') : t('common.idle')],
                 [t('update.updateStateStat'), data.updateState || t('common.idle')]
             ]);
 
             if (data.updateRunning) {
-                clearBusyRetry('release');
+                clearBusyRetry(updateVariantConfig('rr').retryKey);
+                clearBusyRetry(updateVariantConfig('rrm').retryKey);
             }
 
-            if ($('startLocalUpdate')) {
-                $('startLocalUpdate').disabled = data.updateRunning;
-            }
-            if ($('startOnlineUpdate')) {
-                $('startOnlineUpdate').disabled = !state.release || data.updateRunning;
-            }
-            if ($('checkRelease')) {
-                $('checkRelease').disabled = data.updateRunning;
-            }
+            syncUpdateVariantButtons('rrm', data.updateRunning);
+            syncUpdateVariantButtons('rr', data.updateRunning);
             return;
         }
 
@@ -1364,21 +1192,65 @@
         updateUsbTable(hardware.usbDevices || [], t('hardware.usbEmpty'));
     }
 
-    function renderRelease(data) {
-        state.release = data;
-        $('releaseBox').innerHTML =
+    function updateReleaseState(kind, data) {
+        state.updateReleases[kind] = data || null;
+    }
+
+    function currentReleaseState(kind) {
+        return state.updateReleases[kind] || null;
+    }
+
+    function renderUpdateRelease(kind, data) {
+        var cfg = updateVariantConfig(kind);
+
+        updateReleaseState(kind, data);
+        renderReleaseBox(cfg.releaseBoxId, data);
+        syncUpdateVariantButtons(kind, state.updateRunning);
+    }
+
+    function syncUpdateVariantButtons(kind, isUpdateRunning) {
+        var cfg = updateVariantConfig(kind);
+        var releaseData = currentReleaseState(kind);
+        var checkButton = $(cfg.checkButtonId);
+        var onlineButton = $(cfg.onlineButtonId);
+        var localButton = $(cfg.localButtonId);
+
+        if (checkButton) {
+            checkButton.disabled = !!isUpdateRunning;
+        }
+        if (onlineButton) {
+            onlineButton.disabled = !!isUpdateRunning || !releaseData || !releaseData.assetUrl;
+        }
+        if (localButton) {
+            localButton.disabled = !!isUpdateRunning;
+        }
+    }
+
+    function renderReleaseBox(elementId, data) {
+        var target = $(elementId);
+
+        if (!target) {
+            return;
+        }
+
+        target.innerHTML =
             '<div class="stat"><span class="statLabel">' + escapeHtml(t('update.currentVersionRelease')) + '</span><span class="statValue">' + escapeHtml(displayValue(data.currentVersion)) + '</span></div>' +
             '<div class="stat"><span class="statLabel">' + escapeHtml(t('update.latestVersionRelease')) + '</span><span class="statValue">' + escapeHtml(displayValue(data.latestVersion)) + '</span></div>' +
             '<div class="stat"><span class="statLabel">' + escapeHtml(t('update.publishedAt')) + '</span><span class="statValue">' + escapeHtml(displayValue(data.publishedAt)) + '</span></div>' +
             '<div class="stat"><span class="statLabel">' + escapeHtml(t('update.asset')) + '</span><span class="statValue">' + escapeHtml(data.assetName || t('update.noAsset')) + '</span></div>' +
             '<div class="stat hint"><span class="statLabel">' + escapeHtml(t('update.github')) + '</span><span class="statValue"><a href="' + escapeHtml(data.htmlUrl || '#') + '" target="_blank" rel="noreferrer">' + escapeHtml(data.htmlUrl || '') + '</a></span></div>';
-        if ($('startOnlineUpdate')) {
-            $('startOnlineUpdate').disabled = !data.assetUrl || state.updateRunning;
-        }
     }
 
     function loadOverview(options) {
         return requestWithPageLoading('overview', options, function (data) {
+            if (shouldHoldOverviewLoading(data)) {
+                freezeLoading(t('update.loadingBoot'), 2200);
+                scheduleBusyRetry('overview-ready', function () {
+                    loadOverview({ silent: true });
+                });
+                return data;
+            }
+            clearBusyRetry('overview-ready');
             renderOverview(data);
             return data;
         }).catch(function (error) {
@@ -1393,35 +1265,43 @@
         });
     }
 
-    function loadRelease(options) {
+    function loadUpdateReleaseByKind(kind, options) {
+        var cfg = updateVariantConfig(kind);
+
+        return loadUpdateRelease(cfg.releaseAction, cfg.loadingKey, options, function (data) {
+            renderUpdateRelease(kind, data);
+        });
+    }
+
+    function loadUpdateRelease(action, loadingKey, options, onLoad) {
         if (state.updateRunning || state.upgradeBlocked) {
-            clearBusyRetry('release');
+            clearBusyRetry(action);
             return Promise.resolve();
         }
 
-        return requestWithPageLoading('release', options, function (data) {
+        return requestWithPageLoading(action, options, function (data) {
             if (isRetryBusyResult(data)) {
                 if (state.updateRunning) {
-                    clearBusyRetry('release');
+                    clearBusyRetry(action);
                     return data;
                 }
-                setBusyLoading(t('update.loadingRelease'));
-                scheduleBusyRetry('release', function () {
-                    loadRelease({ silent: true });
+                setBusyLoading(t(loadingKey));
+                scheduleBusyRetry(action, function () {
+                    loadUpdateRelease(action, loadingKey, { silent: true }, onLoad);
                 });
                 return data;
             }
-            renderRelease(data);
+            onLoad(data);
             return data;
         }).catch(function (error) {
             if (isBusyError(error)) {
                 if (state.updateRunning) {
-                    clearBusyRetry('release');
+                    clearBusyRetry(action);
                     return;
                 }
-                setBusyLoading(t('update.loadingRelease'));
-                scheduleBusyRetry('release', function () {
-                    loadRelease({ silent: true });
+                setBusyLoading(t(loadingKey));
+                scheduleBusyRetry(action, function () {
+                    loadUpdateRelease(action, loadingKey, { silent: true }, onLoad);
                 });
                 return;
             }
@@ -1445,33 +1325,35 @@
         });
     }
 
-    function startOnlineUpdate() {
-        request('start-update-online', { method: 'POST' }).then(function (data) {
-            setToast(data.message || t('update.onlineStarted'), 'success');
-            loadOverview();
-            refreshLog();
-        }).catch(function (error) {
-            if (isBusyError(error)) {
-                setBusyLoading(t('update.loadingState'));
-                return;
-            }
-            setToast(error.message, 'error');
-        });
+    function startUpdateOnline(kind) {
+        var cfg = updateVariantConfig(kind);
+
+        startUpdateAction(cfg.onlineAction, null, cfg.onlineSuccessKey, cfg.silentLogRefresh);
     }
 
-    function startLocalUpdate() {
-        var path = $('localArchivePath').value.trim();
+    function startUpdateLocal(kind) {
+        var cfg = updateVariantConfig(kind);
+        var input = $(cfg.localInputId);
+        var path = input ? input.value.trim() : '';
+
         if (!path) {
-            setToast(t('update.enterLocalPath'), 'error');
+            setToast(t(cfg.localPathErrorKey), 'error');
             return;
         }
-        request('start-update-local', {
-            method: 'POST',
-            data: { path: path }
-        }).then(function (data) {
-            setToast(data.message || t('update.localStarted'), 'success');
+        startUpdateAction(cfg.localAction, { path: path }, cfg.localSuccessKey, cfg.silentLogRefresh);
+    }
+
+    function startUpdateAction(action, data, successKey, silentLogRefresh) {
+        var requestOptions = { method: 'POST' };
+
+        if (data) {
+            requestOptions.data = data;
+        }
+
+        request(action, requestOptions).then(function (response) {
+            setToast(response.message || t(successKey), 'success');
             loadOverview();
-            refreshLog();
+            refreshLog(silentLogRefresh ? { silent: true } : undefined);
         }).catch(function (error) {
             if (isBusyError(error)) {
                 setBusyLoading(t('update.loadingState'));
@@ -1482,6 +1364,7 @@
     }
 
     function initOverview() {
+        setBusyLoading(t('update.loadingBoot'));
         $('refreshOverview').addEventListener('click', function () {
             loadOverview();
         });
@@ -1493,24 +1376,39 @@
     }
 
     function initUpdate() {
+        setBusyLoading(t('update.loadingState'));
         $('refreshOverview').addEventListener('click', function () {
             loadOverview();
         });
-        $('checkRelease').addEventListener('click', function () {
-            loadRelease();
+        $(updateVariantConfig('rrm').checkButtonId).addEventListener('click', function () {
+            loadUpdateReleaseByKind('rrm');
+        });
+        $(updateVariantConfig('rr').checkButtonId).addEventListener('click', function () {
+            loadUpdateReleaseByKind('rr');
         });
         $('refreshLog').addEventListener('click', function () {
             refreshLog();
         });
-        $('startOnlineUpdate').addEventListener('click', startOnlineUpdate);
-        $('startLocalUpdate').addEventListener('click', startLocalUpdate);
+        $(updateVariantConfig('rrm').onlineButtonId).addEventListener('click', function () {
+            startUpdateOnline('rrm');
+        });
+        $(updateVariantConfig('rrm').localButtonId).addEventListener('click', function () {
+            startUpdateLocal('rrm');
+        });
+        $(updateVariantConfig('rr').onlineButtonId).addEventListener('click', function () {
+            startUpdateOnline('rr');
+        });
+        $(updateVariantConfig('rr').localButtonId).addEventListener('click', function () {
+            startUpdateLocal('rr');
+        });
 
         loadOverview().then(function () {
             if (!state.upgradeBlocked) {
-                loadRelease();
+                loadUpdateReleaseByKind('rrm', { silent: true });
+                loadUpdateReleaseByKind('rr', { silent: true });
             }
         });
-        refreshLog();
+        refreshLog({ silent: true });
 
         (function pollUpdate() {
             loadOverview({ silent: true });

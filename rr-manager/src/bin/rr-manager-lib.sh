@@ -6,6 +6,7 @@ PKG_NAME="${PKG_NAME:-rr-manager}"
 PKG_ROOT="${PKG_ROOT:-/var/packages/${PKG_NAME}/target}"
 STATE_DIR="${STATE_DIR:-${PKG_ROOT}/var}"
 WORK_DIR="${WORK_DIR:-${STATE_DIR}/work}"
+SCRIPT_LOG_DIR="${SCRIPT_LOG_DIR:-${STATE_DIR}/logs}"
 MOUNT_BASE="${MOUNT_BASE:-/mnt}"
 LOCK_DIR="${LOCK_DIR:-${STATE_DIR}/bootloader.lock}"
 LOCK_PID_FILE="${LOCK_PID_FILE:-${LOCK_DIR}/pid}"
@@ -13,15 +14,55 @@ MOUNTS_FILE="${MOUNTS_FILE:-${WORK_DIR}/mounts.list}"
 UPDATE_STATE="${UPDATE_STATE:-${STATE_DIR}/update.state}"
 UPDATE_LOG="${UPDATE_LOG:-${STATE_DIR}/update.log}"
 UPDATE_PID_FILE="${UPDATE_PID_FILE:-${STATE_DIR}/update.pid}"
+MOUNT_ERROR_FILE="${MOUNT_ERROR_FILE:-${STATE_DIR}/mount.error}"
+MOUNT_ERROR_KIND_FILE="${MOUNT_ERROR_KIND_FILE:-${STATE_DIR}/mount.error.kind}"
+RRM_JOB_LOG="${RRM_JOB_LOG:-${SCRIPT_LOG_DIR}/rr-manager-job.log}"
 RELEASE_REPO_URL="${RELEASE_REPO_URL:-https://github.com/RROrg/rr}"
 RELEASE_LATEST_URL="${RELEASE_LATEST_URL:-${RELEASE_REPO_URL}/releases/latest}"
 RELEASE_TAGS_URL="${RELEASE_TAGS_URL:-${RELEASE_REPO_URL}/tags}"
 RELEASE_DOWNLOAD_BASE_URL="${RELEASE_DOWNLOAD_BASE_URL:-${RELEASE_REPO_URL}/releases/download}"
+RRM_RELEASE_REPO_URL="${RRM_RELEASE_REPO_URL:-https://github.com/RROrg/RRManager}"
+RRM_RELEASE_LATEST_URL="${RRM_RELEASE_LATEST_URL:-${RRM_RELEASE_REPO_URL}/releases/latest}"
+RRM_RELEASE_DOWNLOAD_BASE_URL="${RRM_RELEASE_DOWNLOAD_BASE_URL:-${RRM_RELEASE_REPO_URL}/releases/download}"
 PRERELEASE="${PRERELEASE:-false}"
 RRMDO_BIN="${RRMDO_BIN:-/sbin/rrmdo}"
 
 rrm_ensure_dirs() {
-    mkdir -p "${STATE_DIR}" "${WORK_DIR}" "${MOUNT_BASE}"
+    mkdir -p "${STATE_DIR}" "${WORK_DIR}" "${SCRIPT_LOG_DIR}" "${MOUNT_BASE}"
+}
+
+rrm_set_mount_error() {
+    RRM_MOUNT_ERROR="$1"
+    RRM_MOUNT_ERROR_KIND="${2:-unavailable}"
+    rrm_ensure_dirs
+    printf '%s\n' "${RRM_MOUNT_ERROR}" >"${MOUNT_ERROR_FILE}"
+    printf '%s\n' "${RRM_MOUNT_ERROR_KIND}" >"${MOUNT_ERROR_KIND_FILE}"
+}
+
+rrm_clear_mount_error() {
+    RRM_MOUNT_ERROR=''
+    RRM_MOUNT_ERROR_KIND=''
+    rm -f "${MOUNT_ERROR_FILE}" "${MOUNT_ERROR_KIND_FILE}" >/dev/null 2>&1 || true
+}
+
+rrm_get_mount_error() {
+    if [ -n "${RRM_MOUNT_ERROR:-}" ]; then
+        printf '%s\n' "${RRM_MOUNT_ERROR}"
+        return 0
+    fi
+
+    [ -f "${MOUNT_ERROR_FILE}" ] || return 1
+    sed -n '1{s/\r$//;p;q;}' "${MOUNT_ERROR_FILE}" 2>/dev/null
+}
+
+rrm_get_mount_error_kind() {
+    if [ -n "${RRM_MOUNT_ERROR_KIND:-}" ]; then
+        printf '%s\n' "${RRM_MOUNT_ERROR_KIND}"
+        return 0
+    fi
+
+    [ -f "${MOUNT_ERROR_KIND_FILE}" ] || return 1
+    sed -n '1{s/\r$//;p;q;}' "${MOUNT_ERROR_KIND_FILE}" 2>/dev/null
 }
 
 rrm_do() {
@@ -234,14 +275,62 @@ rrm_load_loader_modules() {
     rrm_do modprobe -q ext4 >/dev/null 2>&1 || true
 }
 
+rrm_partition_label() {
+    device="$1"
+    label_value=''
+
+    if command -v blkid >/dev/null 2>&1; then
+        label_value="$(blkid -o value -s LABEL "${device}" 2>/dev/null | sed -n '1{s/\r$//;p;q;}')"
+    fi
+
+    if [ -z "${label_value}" ] && command -v lsblk >/dev/null 2>&1; then
+        label_value="$(lsblk -no LABEL "${device}" 2>/dev/null | sed -n '1{s/\r$//;p;q;}')"
+    fi
+
+    [ -n "${label_value}" ] || return 1
+    printf '%s\n' "${label_value}"
+}
+
+rrm_validate_rr_boot_labels() {
+    labels_summary=''
+    mismatch=0
+
+    for partition in 1 2 3; do
+        device="/dev/synoboot${partition}"
+        expected_label="RR${partition}"
+        actual_label="$(rrm_partition_label "${device}" 2>/dev/null || true)"
+
+        [ -n "${actual_label}" ] || actual_label='(missing)'
+        [ -z "${labels_summary}" ] || labels_summary="${labels_summary}, "
+        labels_summary="${labels_summary}${device}=${actual_label}"
+
+        if [ "${actual_label}" != "${expected_label}" ]; then
+            mismatch=1
+        fi
+    done
+
+    if [ "${mismatch}" -ne 0 ]; then
+        rrm_set_mount_error "Current environment is not an RR bootloader. Unsupported. Detected labels: ${labels_summary}." "unsupported"
+        return 1
+    fi
+
+    return 0
+}
+
 rrm_mount_partition() {
     partition="$1"
     filesystem="$2"
     device="/dev/synoboot${partition}"
     mount_point="$(rrm_default_mount_point "${partition}")"
 
-    [ -b "${device}" ] || return 1
-    rrm_do mkdir -p "${mount_point}" || return 1
+    [ -b "${device}" ] || {
+        rrm_set_mount_error "Boot partition device ${device} was not found."
+        return 1
+    }
+    rrm_do mkdir -p "${mount_point}" || {
+        rrm_set_mount_error "Unable to create mount point ${mount_point}."
+        return 1
+    }
 
     if rrm_mount_source_is "${mount_point}" "${device}"; then
         return 0
@@ -253,16 +342,23 @@ rrm_mount_partition() {
     fi
 
     if rrm_is_mounted "${mount_point}"; then
-        rrm_do umount "${mount_point}" >/dev/null 2>&1 || return 1
+        rrm_do umount "${mount_point}" >/dev/null 2>&1 || {
+            rrm_set_mount_error "Unable to unmount existing filesystem at ${mount_point}."
+            return 1
+        }
     fi
 
-    rrm_do mount -t "${filesystem}" "${device}" "${mount_point}" >/dev/null 2>&1 || return 1
+    rrm_do mount -t "${filesystem}" "${device}" "${mount_point}" >/dev/null 2>&1 || {
+        rrm_set_mount_error "Failed to mount ${device} on ${mount_point} as ${filesystem}."
+        return 1
+    }
     rrm_mount_record_add "${mount_point}"
     return 0
 }
 
 rrm_mount_synoboot() {
     rrm_ensure_dirs
+    rrm_clear_mount_error
 
     if [ "${RRM_SKIP_MOUNT:-0}" = "1" ] && [ -n "$(rrm_device_mount_point /dev/synoboot1 2>/dev/null || true)" ]; then
         return 0
@@ -271,10 +367,24 @@ rrm_mount_synoboot() {
     rrm_set_install_flag
     rrm_load_loader_modules
 
-    [ -b /dev/synoboot ] || return 1
-    [ -b /dev/synoboot1 ] || return 1
-    [ -b /dev/synoboot2 ] || return 1
-    [ -b /dev/synoboot3 ] || return 1
+    [ -b /dev/synoboot ] || {
+        rrm_set_mount_error "Boot device /dev/synoboot is not available."
+        return 1
+    }
+    [ -b /dev/synoboot1 ] || {
+        rrm_set_mount_error "Boot partition /dev/synoboot1 is not available."
+        return 1
+    }
+    [ -b /dev/synoboot2 ] || {
+        rrm_set_mount_error "Boot partition /dev/synoboot2 is not available."
+        return 1
+    }
+    [ -b /dev/synoboot3 ] || {
+        rrm_set_mount_error "Boot partition /dev/synoboot3 is not available."
+        return 1
+    }
+
+    rrm_validate_rr_boot_labels || return 1
 
     rrm_mount_partition 1 vfat || {
         rrm_cleanup_mounts
@@ -289,9 +399,21 @@ rrm_mount_synoboot() {
         return 1
     }
 
-    [ -n "$(rrm_device_mount_point /dev/synoboot1 2>/dev/null || true)" ] || return 1
-    [ -n "$(rrm_device_mount_point /dev/synoboot2 2>/dev/null || true)" ] || return 1
-    [ -n "$(rrm_device_mount_point /dev/synoboot3 2>/dev/null || true)" ]
+    [ -n "$(rrm_device_mount_point /dev/synoboot1 2>/dev/null || true)" ] || {
+        rrm_set_mount_error "Boot partition /dev/synoboot1 is still not mounted after mount attempt."
+        return 1
+    }
+    [ -n "$(rrm_device_mount_point /dev/synoboot2 2>/dev/null || true)" ] || {
+        rrm_set_mount_error "Boot partition /dev/synoboot2 is still not mounted after mount attempt."
+        return 1
+    }
+    [ -n "$(rrm_device_mount_point /dev/synoboot3 2>/dev/null || true)" ] || {
+        rrm_set_mount_error "Boot partition /dev/synoboot3 is still not mounted after mount attempt."
+        return 1
+    }
+
+    rrm_clear_mount_error
+    return 0
 }
 
 rrm_current_version() {
@@ -301,6 +423,34 @@ rrm_current_version() {
     version_value="$(sed -n '/[^[:space:]]/ { s/\r$//; p; q; }' "${version_file}" 2>/dev/null)"
     [ -n "${version_value}" ] || return 1
     printf '%s\n' "${version_value}"
+}
+
+rrm_current_package_version() {
+    info_file="/var/packages/${PKG_NAME}/INFO"
+    version_value=""
+
+    if [ -f "${info_file}" ]; then
+        version_value="$(sed -n 's/^version=//p' "${info_file}" 2>/dev/null | sed -n '1{s/^"//;s/"$//;p;}')"
+    fi
+
+    if [ -z "${version_value}" ] && command -v synopkg >/dev/null 2>&1; then
+        version_value="$(synopkg version "${PKG_NAME}" 2>/dev/null | sed -n '1{s/\r$//;p;}')"
+    fi
+
+    [ -n "${version_value}" ] || return 1
+    printf '%s\n' "${version_value}"
+}
+
+rrm_synopkg_install() {
+    package_source="$1"
+    [ -n "${package_source}" ] || return 1
+
+    if [ -x "${RRMDO_BIN}" ]; then
+        "${RRMDO_BIN}" synopkg install "${package_source}"
+        return $?
+    fi
+
+    synopkg install "${package_source}"
 }
 
 rrm_read_first_line() {
@@ -1168,6 +1318,29 @@ rrm_release_normalize_tag() {
     printf '%s\n' "$1" | sed 's#/$##; s#.*/##; s/^[vV]//'
 }
 
+rrm_fetch_latest_release_tag_from() {
+    latest_url="$1"
+    resolved_url="$(rrm_http_resolve_effective_url "${latest_url}" 2>/dev/null | sed -n '1{s/\r$//;p;}')"
+    [ -n "${resolved_url}" ] || return 1
+    rrm_release_normalize_tag "${resolved_url}"
+}
+
+rrm_release_html_url_from() {
+    repo_url="$1"
+    tag_value="$2"
+    printf '%s/releases/tag/%s\n' "${repo_url}" "${tag_value}"
+}
+
+rrm_release_published_at_from() {
+    repo_url="$1"
+    tag_value="$2"
+    [ -n "${tag_value}" ] || return 1
+
+    rrm_http_get "$(rrm_release_html_url_from "${repo_url}" "${tag_value}")" 2>/dev/null |
+        grep -m 1 'relative-time[^>]*datetime=' |
+        sed -n 's/.*datetime="\([^"]*\)".*/\1/p'
+}
+
 rrm_fetch_latest_release_tag() {
     if [ "${PRERELEASE}" = "true" ]; then
         rrm_http_get "${RELEASE_TAGS_URL}" |
@@ -1179,23 +1352,17 @@ rrm_fetch_latest_release_tag() {
         return $?
     fi
 
-    latest_url="$(rrm_http_resolve_effective_url "${RELEASE_LATEST_URL}" 2>/dev/null | sed -n '1{s/\r$//;p;}')"
-    [ -n "${latest_url}" ] || return 1
-    rrm_release_normalize_tag "${latest_url}"
+    rrm_fetch_latest_release_tag_from "${RELEASE_LATEST_URL}"
 }
 
 rrm_release_html_url() {
     tag_value="$1"
-    printf '%s/releases/tag/%s\n' "${RELEASE_REPO_URL}" "${tag_value}"
+    rrm_release_html_url_from "${RELEASE_REPO_URL}" "${tag_value}"
 }
 
 rrm_release_published_at() {
     tag_value="$1"
-    [ -n "${tag_value}" ] || return 1
-
-    rrm_http_get "$(rrm_release_html_url "${tag_value}")" 2>/dev/null |
-        grep -m 1 'relative-time[^>]*datetime=' |
-        sed -n 's/.*datetime="\([^"]*\)".*/\1/p'
+    rrm_release_published_at_from "${RELEASE_REPO_URL}" "${tag_value}"
 }
 
 rrm_release_asset_info() {
@@ -1212,6 +1379,34 @@ rrm_release_asset_info() {
 
     asset_name="updateall-${tag_value}.zip"
     asset_url="${RELEASE_DOWNLOAD_BASE_URL}/${tag_value}/${asset_name}"
+    printf '%s\t%s\n' "${asset_name}" "${asset_url}"
+}
+
+rrm_fetch_latest_rrm_release_tag() {
+    rrm_fetch_latest_release_tag_from "${RRM_RELEASE_LATEST_URL}"
+}
+
+rrm_rrm_release_html_url() {
+    tag_value="$1"
+    rrm_release_html_url_from "${RRM_RELEASE_REPO_URL}" "${tag_value}"
+}
+
+rrm_rrm_release_published_at() {
+    tag_value="$1"
+    rrm_release_published_at_from "${RRM_RELEASE_REPO_URL}" "${tag_value}"
+}
+
+rrm_rrm_release_asset_info() {
+    tag_value="$1"
+    [ -n "${tag_value}" ] || return 1
+
+    asset_name="rr-manager_noarch-dsm7_${tag_value}.spk"
+    asset_url="${RRM_RELEASE_DOWNLOAD_BASE_URL}/${tag_value}/${asset_name}"
+    if rrm_http_exists "${asset_url}"; then
+        printf '%s\t%s\n' "${asset_name}" "${asset_url}"
+        return 0
+    fi
+
     printf '%s\t%s\n' "${asset_name}" "${asset_url}"
 }
 

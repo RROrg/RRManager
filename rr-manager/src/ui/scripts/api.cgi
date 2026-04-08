@@ -152,6 +152,14 @@ release_locked_mount() {
     rrm_release_lock
 }
 
+rrm_mount_failure_message() {
+    rrm_get_mount_error 2>/dev/null || printf '%s' 'Unable to mount loader disk.'
+}
+
+rrm_mount_failure_status() {
+    rrm_get_mount_error_kind 2>/dev/null || printf '%s' 'unavailable'
+}
+
 csv_to_lines() {
     printf '%s' "$1" | tr ',' '\n' | sed 's/\r//g' | sed '/^[[:space:]]*$/d'
 }
@@ -214,6 +222,7 @@ collect_overview() {
     state_value="$(rrm_read_update_state_field state 2>/dev/null || printf 'idle')"
     message_value="$(rrm_read_update_state_field message 2>/dev/null || printf 'Ready.')"
     version_value="$(rrm_current_version 2>/dev/null || true)"
+    package_version_value="$(rrm_current_package_version 2>/dev/null || true)"
     reboot_pending_kind=''
     busy_value='false'
     mount_status='ready'
@@ -324,8 +333,8 @@ EOF
             fi
             release_locked_mount
         else
-            mount_status='unavailable'
-            mount_message='Unable to mount loader disk to inspect the current RR version.'
+            mount_status="$(rrm_mount_failure_status)"
+            mount_message="$(rrm_mount_failure_message)"
         fi
     fi
 
@@ -333,7 +342,7 @@ EOF
     rrm_is_update_running && running_value='true'
 
     send_ok "$(cat <<EOF
-{"ok":true,"busy":${busy_value},"currentVersion":$(json_quote "${version_value}"),"updateState":$(json_quote "${state_value}"),"updateMessage":$(json_quote "${message_value}"),"updateRunning":${running_value},"hardware":{"dmiVendor":$(json_quote "${dmi_vendor}"),"dmiProduct":$(json_quote "${dmi_product}"),"dmiVersion":$(json_quote "${dmi_version}"),"biosVersion":$(json_quote "${bios_version}"),"firmwareMode":$(json_quote "${firmware_mode}"),"cpuModel":$(json_quote "${cpu_model}"),"cpuCores":$(json_quote "${cpu_cores}"),"cpuThreads":$(json_quote "${cpu_threads}"),"ramTotal":$(json_quote "${ram_total}"),"kernel":$(json_quote "${kernel_release}"),"arch":$(json_quote "${machine_arch}"),"pciDevices":${pci_devices_json},"usbDevices":${usb_devices_json}},"boot":{"lockState":$(json_quote "$( [ "${busy_value}" = 'true' ] && printf 'busy' || printf 'idle' )"),"mountStatus":$(json_quote "${mount_status}"),"mountMessage":$(json_quote "${mount_message}"),"accessMethod":$(json_quote "${access_method}"),"bootType":$(json_quote "${boot_type}"),"model":$(json_quote "${boot_model}"),"version":$(json_quote "${boot_version}"),"kernel":$(json_quote "${boot_kernel}"),"lkm":$(json_quote "${boot_lkm}"),"mev":$(json_quote "${boot_mev}"),"sn":$(json_quote "${boot_sn}"),"mac1":$(json_quote "${boot_mac1}"),"mac2":$(json_quote "${boot_mac2}")}}
+{"ok":true,"busy":${busy_value},"currentVersion":$(json_quote "${version_value}"),"currentPackageVersion":$(json_quote "${package_version_value}"),"updateState":$(json_quote "${state_value}"),"updateMessage":$(json_quote "${message_value}"),"updateRunning":${running_value},"hardware":{"dmiVendor":$(json_quote "${dmi_vendor}"),"dmiProduct":$(json_quote "${dmi_product}"),"dmiVersion":$(json_quote "${dmi_version}"),"biosVersion":$(json_quote "${bios_version}"),"firmwareMode":$(json_quote "${firmware_mode}"),"cpuModel":$(json_quote "${cpu_model}"),"cpuCores":$(json_quote "${cpu_cores}"),"cpuThreads":$(json_quote "${cpu_threads}"),"ramTotal":$(json_quote "${ram_total}"),"kernel":$(json_quote "${kernel_release}"),"arch":$(json_quote "${machine_arch}"),"pciDevices":${pci_devices_json},"usbDevices":${usb_devices_json}},"boot":{"lockState":$(json_quote "$( [ "${busy_value}" = 'true' ] && printf 'busy' || printf 'idle' )"),"mountStatus":$(json_quote "${mount_status}"),"mountMessage":$(json_quote "${mount_message}"),"accessMethod":$(json_quote "${access_method}"),"bootType":$(json_quote "${boot_type}"),"model":$(json_quote "${boot_model}"),"version":$(json_quote "${boot_version}"),"kernel":$(json_quote "${boot_kernel}"),"lkm":$(json_quote "${boot_lkm}"),"mev":$(json_quote "${boot_mev}"),"sn":$(json_quote "${boot_sn}"),"mac1":$(json_quote "${boot_mac1}"),"mac2":$(json_quote "${boot_mac2}")}}
 EOF
 )"
 }
@@ -355,7 +364,7 @@ read_file_action() {
             return
             ;;
         11)
-            send_error 500 "Unable to mount /dev/synoboot1."
+            send_error 500 "$(rrm_mount_failure_message)"
             return
             ;;
     esac
@@ -399,7 +408,7 @@ write_file_action() {
             return
             ;;
         11)
-            send_error 500 "Unable to mount /dev/synoboot1."
+            send_error 500 "$(rrm_mount_failure_message)"
             return
             ;;
     esac
@@ -440,7 +449,7 @@ write_file_action() {
     send_ok "{\"ok\":true,\"message\":$(json_quote "${label} saved successfully.")}"
 }
 
-release_action() {
+rr_release_info_action() {
     tag_value="$(rrm_fetch_latest_release_tag 2>/dev/null || true)"
     [ -n "${tag_value}" ] || {
         send_app_error "Unable to query the latest RR release from GitHub."
@@ -459,7 +468,7 @@ release_action() {
             return
             ;;
         11)
-            send_error 500 "Unable to mount /dev/synoboot1."
+            send_error 500 "$(rrm_mount_failure_message)"
             return
             ;;
     esac
@@ -469,7 +478,23 @@ release_action() {
     send_ok "{\"ok\":true,\"currentVersion\":$(json_quote "${current_version}"),\"latestVersion\":$(json_quote "${tag_value}"),\"publishedAt\":$(json_quote "${published_value}"),\"assetName\":$(json_quote "${asset_name}"),\"assetUrl\":$(json_quote "${asset_url}"),\"htmlUrl\":$(json_quote "$(rrm_release_html_url "${tag_value}")")}"
 }
 
-start_online_update_action() {
+rrm_release_info_action() {
+    tag_value="$(rrm_fetch_latest_rrm_release_tag 2>/dev/null || true)"
+    [ -n "${tag_value}" ] || {
+        send_app_error "Unable to query the latest RR Manager release from GitHub."
+        return
+    }
+
+    published_value="$(rrm_rrm_release_published_at "${tag_value}" 2>/dev/null || true)"
+    asset_info="$(rrm_rrm_release_asset_info "${tag_value}" 2>/dev/null || true)"
+    asset_name="$(printf '%s' "${asset_info}" | awk -F '\t' 'NR == 1 { print $1 }')"
+    asset_url="$(printf '%s' "${asset_info}" | awk -F '\t' 'NR == 1 { print $2 }')"
+    current_version="$(rrm_current_package_version 2>/dev/null || true)"
+
+    send_ok "{\"ok\":true,\"currentVersion\":$(json_quote "${current_version}"),\"latestVersion\":$(json_quote "${tag_value}"),\"publishedAt\":$(json_quote "${published_value}"),\"assetName\":$(json_quote "${asset_name}"),\"assetUrl\":$(json_quote "${asset_url}"),\"htmlUrl\":$(json_quote "$(rrm_rrm_release_html_url "${tag_value}")")}"
+}
+
+rr_update_online_action() {
     if rrm_is_update_running; then
         send_error 409 "An RR update is already running."
         return
@@ -498,7 +523,7 @@ start_online_update_action() {
     send_ok "{\"ok\":true,\"message\":$(json_quote "Online update started."),\"latestVersion\":$(json_quote "${tag_value}"),\"assetName\":$(json_quote "${asset_name}")}"
 }
 
-start_local_update_action() {
+rr_update_local_action() {
     if rrm_is_update_running; then
         send_error 409 "An RR update is already running."
         return
@@ -526,6 +551,63 @@ start_local_update_action() {
     send_ok "{\"ok\":true,\"message\":$(json_quote "Local update started."),\"path\":$(json_quote "${archive_path}")}"
 }
 
+rrm_update_online_action() {
+    if rrm_is_update_running; then
+        send_error 409 "An update task is already running."
+        return
+    fi
+
+    tag_value="$(rrm_fetch_latest_rrm_release_tag 2>/dev/null || true)"
+    [ -n "${tag_value}" ] || {
+        send_app_error "Unable to query the latest RR Manager release from GitHub."
+        return
+    }
+
+    asset_info="$(rrm_rrm_release_asset_info "${tag_value}" 2>/dev/null || true)"
+    asset_name="$(printf '%s' "${asset_info}" | awk -F '\t' 'NR == 1 { print $1 }')"
+    asset_url="$(printf '%s' "${asset_info}" | awk -F '\t' 'NR == 1 { print $2 }')"
+
+    [ -n "${asset_url}" ] || {
+        send_app_error "No install package was found in the latest RR Manager release."
+        return
+    }
+
+    : >"${UPDATE_LOG}"
+    "${PKG_ROOT}/bin/rr-manager-job.sh" rrm-online "${asset_url}" "${asset_name}" >>"${UPDATE_LOG}" 2>&1 &
+    echo "$!" >"${UPDATE_PID_FILE}"
+    rrm_write_update_state "queued" "Queued RR Manager self-update for ${tag_value}." "${tag_value}" "rrm-online"
+
+    send_ok "{\"ok\":true,\"message\":$(json_quote "RR Manager self-update started."),\"latestVersion\":$(json_quote "${tag_value}"),\"assetName\":$(json_quote "${asset_name}")}"
+}
+
+rrm_update_local_action() {
+    if rrm_is_update_running; then
+        send_error 409 "An update task is already running."
+        return
+    fi
+
+    archive_path="$(get_param path)"
+    case "${archive_path}" in
+        /*.spk) ;;
+        *)
+            send_error 400 "Please provide an absolute path to a local RR Manager SPK file."
+            return
+            ;;
+    esac
+
+    [ -f "${archive_path}" ] || {
+        send_error 404 "The specified local RR Manager package was not found."
+        return
+    }
+
+    : >"${UPDATE_LOG}"
+    "${PKG_ROOT}/bin/rr-manager-job.sh" rrm-local "${archive_path}" >>"${UPDATE_LOG}" 2>&1 &
+    echo "$!" >"${UPDATE_PID_FILE}"
+    rrm_write_update_state "queued" "Queued local RR Manager package $(basename "${archive_path}")." "" "rrm-local"
+
+    send_ok "{\"ok\":true,\"message\":$(json_quote "Local RR Manager update started."),\"path\":$(json_quote "${archive_path}")}"
+}
+
 log_action() {
     log_tail="$(rrm_read_update_log_tail)"
     send_ok "{\"ok\":true,\"log\":$(json_quote "${log_tail}")}"
@@ -539,7 +621,7 @@ addons_action() {
             return
             ;;
         11)
-            send_error 500 "Unable to mount /dev/synoboot1."
+            send_error 500 "$(rrm_mount_failure_message)"
             return
             ;;
     esac
@@ -562,7 +644,7 @@ save_addons_action() {
             return
             ;;
         11)
-            send_error 500 "Unable to mount /dev/synoboot1."
+            send_error 500 "$(rrm_mount_failure_message)"
             return
             ;;
     esac
@@ -600,7 +682,7 @@ modules_action() {
             return
             ;;
         11)
-            send_error 500 "Unable to mount /dev/synoboot1."
+            send_error 500 "$(rrm_mount_failure_message)"
             return
             ;;
     esac
@@ -623,7 +705,7 @@ save_modules_action() {
             return
             ;;
         11)
-            send_error 500 "Unable to mount /dev/synoboot1."
+            send_error 500 "$(rrm_mount_failure_message)"
             return
             ;;
     esac
@@ -664,9 +746,12 @@ case "${action}" in
     save-addons) save_addons_action ;;
     modules) modules_action ;;
     save-modules) save_modules_action ;;
-    release) release_action ;;
-    start-update-online) start_online_update_action ;;
-    start-update-local) start_local_update_action ;;
+    release) rr_release_info_action ;;
+    rrm-release) rrm_release_info_action ;;
+    start-update-online) rr_update_online_action ;;
+    start-update-local) rr_update_local_action ;;
+    start-rrm-update-online) rrm_update_online_action ;;
+    start-rrm-update-local) rrm_update_local_action ;;
     log) log_action ;;
     *)
         send_error 400 "Unsupported action."

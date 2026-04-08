@@ -11,23 +11,46 @@
         <section class="panel compactPanel">
             <div class="panelHead">
                 <div>
-                    <p class="sectionEyebrow" data-i18n="update.releaseEyebrow">Release Flow</p>
-                    <h2 data-i18n="update.upgradeTitle">Upgrade RR</h2>
+                    <p class="sectionEyebrow" data-i18n="update.rrmReleaseEyebrow">RRM Release</p>
+                    <h2 data-i18n="update.rrmUpgradeTitle">Update RRM</h2>
                 </div>
-                <button id="checkRelease" type="button" data-i18n="update.checkRelease">Check Latest Release</button>
+                <button id="checkRrmRelease" type="button" data-i18n="update.rrmCheckRelease">Check RRM Release</button>
             </div>
-            <div class="releaseBox" id="releaseBox">
-                <p data-i18n="update.noReleaseData">No release data.</p>
+            <div class="releaseBox" id="rrmReleaseBox">
+                <p data-i18n="update.rrmNoReleaseData">No RRM release data.</p>
             </div>
             <div class="actionRow">
-                <button id="startOnlineUpdate" type="button" disabled data-i18n="update.upgradeOnline">Upgrade Online</button>
+                <button id="startRrmOnlineUpdate" type="button" disabled data-i18n="update.rrmUpgradeOnline">Update RRM Online</button>
             </div>
             <label class="field">
-                <span data-i18n="update.localPath">Local update zip path</span>
+                <span data-i18n="update.rrmLocalPath">Local RRM SPK Path</span>
+                <input id="rrmLocalPackagePath" type="text" placeholder="/volume1/public/rr-manager_noarch-dsm7_x.y-z.spk" data-i18n-placeholder="update.rrmLocalPathPlaceholder">
+            </label>
+            <div class="actionRow">
+                <button id="startRrmLocalUpdate" type="button" data-i18n="update.rrmUpgradeLocal">Update RRM From Local Path</button>
+            </div>
+        </section>
+
+        <section class="panel compactPanel">
+            <div class="panelHead">
+                <div>
+                    <p class="sectionEyebrow" data-i18n="update.releaseEyebrow">RR Release</p>
+                    <h2 data-i18n="update.upgradeTitle">Update RR</h2>
+                </div>
+                <button id="checkRelease" type="button" data-i18n="update.checkRelease">Check RR Release</button>
+            </div>
+            <div class="releaseBox" id="releaseBox">
+                <p data-i18n="update.noReleaseData">No RR release data.</p>
+            </div>
+            <div class="actionRow">
+                <button id="startOnlineUpdate" type="button" disabled data-i18n="update.upgradeOnline">Update RR Online</button>
+            </div>
+            <label class="field">
+                <span data-i18n="update.localPath">Local RR ZIP Path</span>
                 <input id="localArchivePath" type="text" placeholder="/volume1/public/updateall-26.3.3.zip" data-i18n-placeholder="update.localPathPlaceholder">
             </label>
             <div class="actionRow">
-                <button id="startLocalUpdate" type="button" data-i18n="update.upgradeLocal">Upgrade From Local Path</button>
+                <button id="startLocalUpdate" type="button" data-i18n="update.upgradeLocal">Update RR From Local Path</button>
             </div>
         </section>
 
