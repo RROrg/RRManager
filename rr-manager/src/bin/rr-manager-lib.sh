@@ -42,7 +42,7 @@ rrm_set_mount_error() {
 rrm_clear_mount_error() {
     RRM_MOUNT_ERROR=''
     RRM_MOUNT_ERROR_KIND=''
-    rm -f "${MOUNT_ERROR_FILE}" "${MOUNT_ERROR_KIND_FILE}" >/dev/null 2>&1 || true
+    rrm_do rm -f "${MOUNT_ERROR_FILE}" "${MOUNT_ERROR_KIND_FILE}" >/dev/null 2>&1 || true
 }
 
 rrm_get_mount_error() {
@@ -196,7 +196,7 @@ rrm_cleanup_mounts() {
             grep -Fx "${mount_point}" "${MOUNTS_FILE}" >/dev/null 2>&1 || continue
             rrm_do umount "${mount_point}" >/dev/null 2>&1 || true
         done
-        rm -f "${MOUNTS_FILE}"
+        rrm_do rm -f "${MOUNTS_FILE}"
     fi
 }
 
@@ -204,7 +204,7 @@ rrm_acquire_lock() {
     rrm_ensure_dirs
     if mkdir "${LOCK_DIR}" >/dev/null 2>&1; then
         printf '%s\n' "$$" >"${LOCK_PID_FILE}" 2>/dev/null || {
-            rm -f "${LOCK_PID_FILE}"
+            rrm_do rm -f "${LOCK_PID_FILE}"
             rmdir "${LOCK_DIR}" >/dev/null 2>&1 || true
             return 1
         }
@@ -214,7 +214,7 @@ rrm_acquire_lock() {
     rrm_cleanup_stale_lock >/dev/null 2>&1 || true
     if mkdir "${LOCK_DIR}" >/dev/null 2>&1; then
         printf '%s\n' "$$" >"${LOCK_PID_FILE}" 2>/dev/null || {
-            rm -f "${LOCK_PID_FILE}"
+            rrm_do rm -f "${LOCK_PID_FILE}"
             rmdir "${LOCK_DIR}" >/dev/null 2>&1 || true
             return 1
         }
@@ -225,7 +225,7 @@ rrm_acquire_lock() {
 }
 
 rrm_release_lock() {
-    rm -f "${LOCK_PID_FILE}" >/dev/null 2>&1 || true
+    rrm_do rm -f "${LOCK_PID_FILE}" >/dev/null 2>&1 || true
     rmdir "${LOCK_DIR}" >/dev/null 2>&1 || true
 }
 
@@ -256,7 +256,7 @@ rrm_cleanup_stale_lock() {
     if rrm_lock_owner_alive; then
         return 1
     fi
-    rm -f "${LOCK_PID_FILE}" >/dev/null 2>&1 || true
+    rrm_do rm -f "${LOCK_PID_FILE}" >/dev/null 2>&1 || true
     rmdir "${LOCK_DIR}" >/dev/null 2>&1 || true
     [ ! -d "${LOCK_DIR}" ]
 }
@@ -434,7 +434,7 @@ rrm_current_package_version() {
     fi
 
     if [ -z "${version_value}" ] && command -v synopkg >/dev/null 2>&1; then
-        version_value="$(synopkg version "${PKG_NAME}" 2>/dev/null | sed -n '1{s/\r$//;p;}')"
+        version_value="$(rrm_do synopkg version "${PKG_NAME}" 2>/dev/null | sed -n '1{s/\r$//;p;}')"
     fi
 
     [ -n "${version_value}" ] || return 1
@@ -445,12 +445,7 @@ rrm_synopkg_install() {
     package_source="$1"
     [ -n "${package_source}" ] || return 1
 
-    if [ -x "${RRMDO_BIN}" ]; then
-        "${RRMDO_BIN}" synopkg install "${package_source}"
-        return $?
-    fi
-
-    synopkg install "${package_source}"
+    rrm_do synopkg install "${package_source}"
 }
 
 rrm_read_first_line() {
@@ -504,11 +499,11 @@ rrm_ram_total() {
 }
 
 rrm_kernel_release() {
-    uname -sr 2>/dev/null || printf '%s\n' 'unknown'
+    rrm_do uname -sr 2>/dev/null || printf '%s\n' 'unknown'
 }
 
 rrm_machine_arch() {
-    uname -m 2>/dev/null || printf '%s\n' 'unknown'
+    rrm_do uname -m 2>/dev/null || printf '%s\n' 'unknown'
 }
 
 rrm_firmware_mode() {
@@ -543,13 +538,13 @@ rrm_cmdline_value() {
 rrm_lspci_details() {
     command -v lspci >/dev/null 2>&1 || return 1
 
-    lspci -nnk 2>/dev/null | sed 's/\r$//' | sed -n '/[^[:space:]]/p'
+    rrm_do lspci -nnk 2>/dev/null | sed 's/\r$//' | sed -n '/[^[:space:]]/p'
 }
 
 rrm_lspci_device_rows() {
     command -v lspci >/dev/null 2>&1 || return 1
 
-    lspci -nnk 2>/dev/null | {
+    rrm_do lspci -nnk 2>/dev/null | {
         current_path=''
         current_type=''
         current_device=''
@@ -736,7 +731,7 @@ rrm_write_managed_file() {
 
     rrm_do cp "${source_file}" "${temp_path}" || return 1
     rrm_do mv "${temp_path}" "${target_path}" || return 1
-    sync >/dev/null 2>&1 || true
+    rrm_do sync >/dev/null 2>&1 || true
 }
 
 rrm_trim() {
@@ -758,17 +753,17 @@ rrm_validate_yaml_file() {
         python -c 'import sys, yaml; yaml.safe_load(open(sys.argv[1], "r").read())' "${source_file}" >/dev/null 2>"${error_file}"
         status=$?
     else
-        rm -f "${error_file}"
+        rrm_do rm -f "${error_file}"
         return 0
     fi
 
     if [ "${status}" -ne 0 ]; then
         sed -n '/[^[:space:]]/ { s/\r$//; p; q; }' "${error_file}"
-        rm -f "${error_file}"
+        rrm_do rm -f "${error_file}"
         return 1
     fi
 
-    rm -f "${error_file}"
+    rrm_do rm -f "${error_file}"
     return 0
 }
 
@@ -846,7 +841,7 @@ rrm_replace_yaml_map_section() {
     target_file="$3"
     temp_file="$(mktemp "${WORK_DIR}/yaml-section.XXXXXX")" || return 1
     replacement_file="$(mktemp "${WORK_DIR}/section-${section_name}.XXXXXX")" || {
-        rm -f "${temp_file}"
+        rrm_do rm -f "${temp_file}"
         return 1
     }
 
@@ -892,15 +887,15 @@ rrm_replace_yaml_map_section() {
             }
         }
     ' "${target_file}" >"${temp_file}" || {
-        rm -f "${replacement_file}" "${temp_file}"
+        rrm_do rm -f "${replacement_file}" "${temp_file}"
         return 1
     }
 
     if ! rrm_do cp -f "${temp_file}" "${target_file}"; then
-        rm -f "${replacement_file}" "${temp_file}"
+        rrm_do rm -f "${replacement_file}" "${temp_file}"
         return 1
     fi
-    rm -f "${replacement_file}" "${temp_file}"
+    rrm_do rm -f "${replacement_file}" "${temp_file}"
 }
 
 rrm_manifest_value() {
@@ -1008,7 +1003,7 @@ rrm_module_entries_fallback() {
     source_path="$1"
     case "${source_path}" in
         *.tgz|*.tar.gz)
-            tar -tf "${source_path}" 2>/dev/null | sed -n 's#^\./##;s#^\/*##;/\.ko$/ { s#\.ko$##; p; }' | awk 'NF { printf "%s\t%s\n", $0, $0 }'
+            rrm_do tar -tf "${source_path}" 2>/dev/null | sed -n 's#^\./##;s#^\/*##;/\.ko$/ { s#\.ko$##; p; }' | awk 'NF { printf "%s\t%s\n", $0, $0 }'
             ;;
         *)
             find "${source_path}" -type f -name '*.ko' 2>/dev/null | while IFS= read -r module_file; do
@@ -1041,7 +1036,7 @@ rrm_module_description_from_file() {
     modinfo_bin="$(rrm_modinfo_bin 2>/dev/null || true)"
 
     if [ -n "${modinfo_bin}" ]; then
-        description_value="$("${modinfo_bin}" -F description "${module_file}" 2>/dev/null | sed -n '/[^[:space:]]/ { s/\r$//; p; q; }')"
+        description_value="$(rrm_do "${modinfo_bin}" -F description "${module_file}" 2>/dev/null | sed -n '/[^[:space:]]/ { s/\r$//; p; q; }')"
         if [ -n "${description_value}" ]; then
             printf '%s\n' "${description_value}"
             return 0
@@ -1059,14 +1054,14 @@ rrm_module_entries_from_path() {
     case "${source_path}" in
         *.tgz|*.tar.gz)
             temp_dir="$(mktemp -d "${WORK_DIR}/moduleinfo.XXXXXX")" || return 1
-            tar -xf "${source_path}" -C "${temp_dir}" >/dev/null 2>&1 || true
+            rrm_do tar -xf "${source_path}" -C "${temp_dir}" >/dev/null 2>&1 || true
             find "${temp_dir}" -type f -name '*.ko' 2>/dev/null | while IFS= read -r module_file; do
                 relative_path="${module_file#${temp_dir}/}"
                 module_name="$(rrm_module_name_from_relative_path "${relative_path}" 2>/dev/null || basename "${module_file}" .ko)"
                 module_description="$(rrm_flatten_text "$(rrm_module_description_from_file "${module_file}" "${module_name}" 2>/dev/null || printf '%s' "${module_name}")")"
                 printf '%s\t%s\n' "${module_name}" "${module_description}" >>"${entries_tmp}"
             done
-            rm -rf "${temp_dir}"
+            rrm_do rm -rf "${temp_dir}"
             ;;
         *)
             find "${source_path}" -type f -name '*.ko' 2>/dev/null | while IFS= read -r module_file; do
@@ -1083,7 +1078,7 @@ rrm_module_entries_from_path() {
     fi
 
     cat "${entries_tmp}"
-    rm -f "${entries_tmp}"
+    rrm_do rm -f "${entries_tmp}"
 }
 
 rrm_modules_signature() {
@@ -1126,7 +1121,7 @@ rrm_current_module_selector() {
     [ -n "${platform}" ] || return 1
 
     if [ -z "${kver}" ] && [ -n "${productver}" ]; then
-        release_value="$(uname -r 2>/dev/null | sed 's/[-+].*$//')"
+        release_value="$(rrm_do uname -r 2>/dev/null | sed 's/[-+].*$//')"
         kver="$(printf '%s\n' "${release_value}" | cut -d'.' -f1-3)"
         if [ -n "${kver}" ]; then
             kernel_major="$(printf '%s\n' "${kver}" | cut -d'.' -f1)"
@@ -1179,14 +1174,14 @@ rrm_modules_name_cache() {
     cache_sig="${WORK_DIR}/modules-meta.sig"
     sig_tmp="$(mktemp "${WORK_DIR}/modules-sig.XXXXXX")" || return 1
     build_tmp="$(mktemp "${WORK_DIR}/modules-build.XXXXXX")" || {
-        rm -f "${sig_tmp}"
+        rrm_do rm -f "${sig_tmp}"
         return 1
     }
 
     rrm_modules_signature "${module_path}" "${selector_key}" >"${sig_tmp}"
 
     if [ -f "${cache_names}" ] && [ -f "${cache_sig}" ] && cmp -s "${sig_tmp}" "${cache_sig}"; then
-        rm -f "${sig_tmp}" "${build_tmp}"
+        rrm_do rm -f "${sig_tmp}" "${build_tmp}"
         printf '%s\n' "${cache_names}"
         return 0
     fi
@@ -1197,23 +1192,23 @@ rrm_modules_name_cache() {
     fi
 
     sort -u "${build_tmp}" | awk -F '\t' 'NF { if (!seen[$1]++) print $0 }' >"${cache_names}.tmp" || {
-        rm -f "${sig_tmp}" "${build_tmp}" "${cache_names}.tmp"
+        rrm_do rm -f "${sig_tmp}" "${build_tmp}" "${cache_names}.tmp"
         return 1
     }
     if [ ! -s "${cache_names}.tmp" ] && [ -f "${cache_names}" ]; then
-        rm -f "${sig_tmp}" "${build_tmp}" "${cache_names}.tmp"
+        rrm_do rm -f "${sig_tmp}" "${build_tmp}" "${cache_names}.tmp"
         printf '%s\n' "${cache_names}"
         return 0
     fi
-    mv "${cache_names}.tmp" "${cache_names}" || {
-        rm -f "${sig_tmp}" "${build_tmp}" "${cache_names}.tmp"
+    rrm_do mv "${cache_names}.tmp" "${cache_names}" || {
+        rrm_do rm -f "${sig_tmp}" "${build_tmp}" "${cache_names}.tmp"
         return 1
     }
-    mv "${sig_tmp}" "${cache_sig}" || {
-        rm -f "${build_tmp}"
+    rrm_do mv "${sig_tmp}" "${cache_sig}" || {
+        rrm_do rm -f "${build_tmp}"
         return 1
     }
-    rm -f "${build_tmp}"
+    rrm_do rm -f "${build_tmp}"
 
     printf '%s\n' "${cache_names}"
 }
@@ -1225,7 +1220,7 @@ rrm_modules_json() {
     module_path="$(rrm_current_module_path "${config_file}" 2>/dev/null || true)"
 
     if [ -z "${selector_key}" ] || [ -z "${module_path}" ] || [ ! -f "${module_path}" ]; then
-        rm -f "${selected_entries}"
+        rrm_do rm -f "${selected_entries}"
         printf '[]'
         return 0
     fi
@@ -1233,7 +1228,7 @@ rrm_modules_json() {
     names_file="$(rrm_modules_name_cache "${module_path}" "${selector_key}" 2>/dev/null || true)"
 
     [ -n "${names_file}" ] && [ -f "${names_file}" ] || {
-        rm -f "${selected_entries}"
+        rrm_do rm -f "${selected_entries}"
         printf '[]'
         return 0
     }
@@ -1258,7 +1253,7 @@ rrm_modules_json() {
     done <"${names_file}"
     printf ']'
 
-    rm -f "${selected_entries}"
+    rrm_do rm -f "${selected_entries}"
 }
 
 rrm_http_get() {
@@ -1425,7 +1420,7 @@ rrm_write_update_state() {
         printf 'source\t%s\n' "${update_source_value}"
         printf 'updated_at\t%s\n' "$(rrm_now)"
     } >"${temp_state}"
-    mv "${temp_state}" "${UPDATE_STATE}"
+    rrm_do mv "${temp_state}" "${UPDATE_STATE}"
 }
 
 rrm_clear_update_log() {
@@ -1522,7 +1517,7 @@ rrm_is_update_running() {
     if kill -0 "${update_pid}" >/dev/null 2>&1; then
         return 0
     fi
-    rm -f "${UPDATE_PID_FILE}"
+    rrm_do rm -f "${UPDATE_PID_FILE}"
     return 1
 }
 
@@ -1603,15 +1598,15 @@ rrm_stage_update_payloads() {
                 payload_archive="${update_root}/$(basename "${source_rel%/}").tgz"
                 [ -f "${payload_archive}" ] || payload_archive="${update_root}/$(basename "${target_rel_clean}").tgz"
                 [ -f "${payload_archive}" ] || return 1
-                rm -rf "${staged_path}"
+                rrm_do rm -rf "${staged_path}"
                 mkdir -p "${staged_path}" || return 1
-                tar -zxf "${payload_archive}" -C "${staged_path}" >>"${UPDATE_LOG}" 2>&1 || return 1
+                rrm_do tar -zxf "${payload_archive}" -C "${staged_path}" >>"${UPDATE_LOG}" 2>&1 || return 1
                 ;;
             *)
                 payload_path="$(rrm_resolve_update_payload_path "${update_root}" "${source_rel}" "${target_rel}" 2>/dev/null || true)"
                 [ -n "${payload_path}" ] && [ -e "${payload_path}" ] || return 1
                 mkdir -p "$(dirname "${staged_path}")" || return 1
-                cp -f "${payload_path}" "${staged_path}" >>"${UPDATE_LOG}" 2>&1 || return 1
+                rrm_do cp -f "${payload_path}" "${staged_path}" >>"${UPDATE_LOG}" 2>&1 || return 1
                 ;;
         esac
     done <"${update_list}"
@@ -1691,11 +1686,11 @@ rrm_refresh_modules_config_after_update() {
     awk -F '\t' 'NF { print $1 }' "${names_file}" >"${entries_file}"
 
     if ! rrm_replace_yaml_map_section "modules" "${entries_file}" "${config_path}"; then
-        rm -f "${entries_file}"
+        rrm_do rm -f "${entries_file}"
         return 1
     fi
 
-    rm -f "${entries_file}"
+    rrm_do rm -f "${entries_file}"
     return 0
 }
 
@@ -1709,9 +1704,9 @@ rrm_apply_update_archive() {
 
     mkdir -p "${expanded_dir}" "${staged_dir}" "${backup_root}"
 
-    unzip -oq "${archive_path}" -d "${temp_dir}" >>"${UPDATE_LOG}" 2>&1 || {
+    rrm_do unzip -oq "${archive_path}" -d "${temp_dir}" >>"${UPDATE_LOG}" 2>&1 || {
         echo "Failed to extract ${archive_path}" >>"${UPDATE_LOG}"
-        rm -rf "${temp_dir}"
+        rrm_do rm -rf "${temp_dir}"
         return 1
     }
 
@@ -1721,43 +1716,43 @@ rrm_apply_update_archive() {
             sha256sum --status -c sha256sum
         ) >>"${UPDATE_LOG}" 2>&1 || {
             echo "Checksum validation failed." >>"${UPDATE_LOG}"
-            rm -rf "${temp_dir}"
+            rrm_do rm -rf "${temp_dir}"
             return 1
         }
     fi
 
     if [ -f "${temp_dir}/update-check.sh" ]; then
-        chmod a+x "${temp_dir}/update-check.sh" >>"${UPDATE_LOG}" 2>&1 || true
+        rrm_do chmod a+x "${temp_dir}/update-check.sh" >>"${UPDATE_LOG}" 2>&1 || true
         (
             cd "${temp_dir}" &&
             bash ./update-check.sh
         ) >>"${UPDATE_LOG}" 2>&1 || {
             echo "The update archive is not compatible with the current environment." >>"${UPDATE_LOG}"
-            rm -rf "${temp_dir}"
+            rrm_do rm -rf "${temp_dir}"
             return 1
         }
     fi
 
     [ -f "${update_list}" ] || {
         echo "update-list.yml is missing from the archive." >>"${UPDATE_LOG}"
-        rm -rf "${temp_dir}"
+        rrm_do rm -rf "${temp_dir}"
         return 1
     }
 
     if ! rrm_stage_update_payloads "${temp_dir}" "${update_list}" "${staged_dir}"; then
         echo "Failed to stage update payloads from update-list.yml." >>"${UPDATE_LOG}"
-        rm -rf "${temp_dir}"
+        rrm_do rm -rf "${temp_dir}"
         return 1
     fi
 
     rrm_mount_synoboot || {
         echo "Unable to mount /dev/synoboot1-3." >>"${UPDATE_LOG}"
-        rm -rf "${temp_dir}"
+        rrm_do rm -rf "${temp_dir}"
         return 1
     }
 
     if ! rrm_check_update_space "${staged_dir}" "${update_list}"; then
-        rm -rf "${temp_dir}"
+        rrm_do rm -rf "${temp_dir}"
         return 1
     fi
 
@@ -1783,7 +1778,7 @@ rrm_apply_update_archive() {
         rrm_backup_existing_path "${target_path}" "${backup_root}"
         rrm_do rm -rf "${target_path}" >>"${UPDATE_LOG}" 2>&1 || {
             echo "Failed to remove ${target_path}" >>"${UPDATE_LOG}"
-            rm -rf "${temp_dir}"
+            rrm_do rm -rf "${temp_dir}"
             return 1
         }
     done <"${update_list}"
@@ -1811,7 +1806,7 @@ rrm_apply_update_archive() {
 
         if [ ! -e "${source_path}" ]; then
             echo "Missing staged update payload ${target_rel}" >>"${UPDATE_LOG}"
-            rm -rf "${temp_dir}"
+            rrm_do rm -rf "${temp_dir}"
             return 1
         fi
 
@@ -1819,23 +1814,23 @@ rrm_apply_update_archive() {
         if [ -d "${source_path}" ]; then
             rrm_do mkdir -p "${target_path}" >>"${UPDATE_LOG}" 2>&1 || {
                 echo "Failed to create ${target_path}" >>"${UPDATE_LOG}"
-                rm -rf "${temp_dir}"
+                rrm_do rm -rf "${temp_dir}"
                 return 1
             }
             rrm_do cp -Rf "${source_path}/." "${target_path}/" >>"${UPDATE_LOG}" 2>&1 || {
                 echo "Failed to copy ${source_path} to ${target_path}" >>"${UPDATE_LOG}"
-                rm -rf "${temp_dir}"
+                rrm_do rm -rf "${temp_dir}"
                 return 1
             }
         else
             rrm_do mkdir -p "$(dirname "${target_path}")" >>"${UPDATE_LOG}" 2>&1 || {
                 echo "Failed to create $(dirname "${target_path}")" >>"${UPDATE_LOG}"
-                rm -rf "${temp_dir}"
+                rrm_do rm -rf "${temp_dir}"
                 return 1
             }
             rrm_do cp -f "${source_path}" "${target_path}" >>"${UPDATE_LOG}" 2>&1 || {
                 echo "Failed to copy ${source_path} to ${target_path}" >>"${UPDATE_LOG}"
-                rm -rf "${temp_dir}"
+                rrm_do rm -rf "${temp_dir}"
                 return 1
             }
         fi
@@ -1845,7 +1840,7 @@ rrm_apply_update_archive() {
             if [ -n "${modules_target}" ] && [ "${target_realpath}" = "${modules_target}" ]; then
                 if ! rrm_refresh_modules_config_after_update "${modules_target}"; then
                     echo "Failed to refresh modules configuration after modules update." >>"${UPDATE_LOG}"
-                    rm -rf "${temp_dir}"
+                    rrm_do rm -rf "${temp_dir}"
                     return 1
                 fi
             fi
@@ -1854,10 +1849,10 @@ rrm_apply_update_archive() {
 
     rrm_mark_update_pending >>"${UPDATE_LOG}" 2>&1 || {
         echo "Failed to mark reboot required after update." >>"${UPDATE_LOG}"
-        rm -rf "${temp_dir}"
+        rrm_do rm -rf "${temp_dir}"
         return 1
     }
-    sync >/dev/null 2>&1 || true
-    rm -rf "${temp_dir}"
+    rrm_do sync >/dev/null 2>&1 || true
+    rrm_do rm -rf "${temp_dir}"
     return 0
 }

@@ -47,17 +47,17 @@
         rr: {
             releaseAction: 'release',
             retryKey: 'release',
-            loadingKey: 'update.loadingRelease',
+            loadingKey: 'update.rrLoadingRelease',
             releaseBoxId: 'releaseBox',
             checkButtonId: 'checkRelease',
             onlineButtonId: 'startOnlineUpdate',
             localButtonId: 'startLocalUpdate',
             localInputId: 'localArchivePath',
-            localPathErrorKey: 'update.enterLocalPath',
+            localPathErrorKey: 'update.rrEnterLocalPath',
             onlineAction: 'start-update-online',
             localAction: 'start-update-local',
-            onlineSuccessKey: 'update.onlineStarted',
-            localSuccessKey: 'update.localStarted',
+            onlineSuccessKey: 'update.rrOnlineStarted',
+            localSuccessKey: 'update.rrLocalStarted',
             silentLogRefresh: false
         },
         rrm: {
@@ -450,7 +450,7 @@
             return bootKernel;
         }
 
-        return bootKernel + ' + ' + systemKernel;
+        return bootKernel + ' [' + systemKernel + ']';
     }
 
     function renderPciTable(items, emptyText) {

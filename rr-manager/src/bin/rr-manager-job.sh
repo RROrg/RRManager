@@ -48,10 +48,10 @@ try_fallback_download() {
 cleanup() {
     status_code="$1"
     append_job_log "rr-manager-job.sh exiting with status ${status_code}."
-    [ -n "${downloaded_archive}" ] && rm -f "${downloaded_archive}"
+    [ -n "${downloaded_archive}" ] && rrm_do rm -f "${downloaded_archive}"
     rrm_cleanup_mounts
     rrm_release_lock
-    rm -f "${UPDATE_PID_FILE}"
+    rrm_do rm -f "${UPDATE_PID_FILE}"
     exit "${status_code}"
 }
 

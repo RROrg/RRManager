@@ -423,7 +423,7 @@ write_file_action() {
     case "${file_id}" in
         user-config)
             if ! yaml_error="$(rrm_validate_yaml_file "${temp_file}")"; then
-                rm -f "${temp_file}"
+                rrm_do rm -f "${temp_file}"
                 release_locked_mount
                 [ -n "${yaml_error}" ] || yaml_error='Unable to parse YAML document.'
                 send_error 400 "Invalid YAML syntax: ${yaml_error}"
@@ -433,13 +433,13 @@ write_file_action() {
     esac
 
     if ! rrm_write_managed_file "${file_id}" "${temp_file}" >/dev/null 2>&1; then
-        rm -f "${temp_file}"
+        rrm_do rm -f "${temp_file}"
         release_locked_mount
         send_error 500 "Failed to save the file to the bootloader partition."
         return
     fi
 
-    rm -f "${temp_file}"
+    rrm_do rm -f "${temp_file}"
     if ! rrm_mark_build_pending >/dev/null 2>&1; then
         release_locked_mount
         send_error 500 "The file was saved, but RR Manager failed to mark reboot required."
@@ -658,13 +658,13 @@ save_addons_action() {
 
     csv_to_lines "${items_value}" | sort -u >"${entries_file}"
     if ! rrm_replace_yaml_map_section "addons" "${entries_file}" "${config_path}"; then
-        rm -f "${entries_file}"
+        rrm_do rm -f "${entries_file}"
         release_locked_mount
         send_error 500 "Failed to save addons into user-config.yml."
         return
     fi
 
-    rm -f "${entries_file}"
+    rrm_do rm -f "${entries_file}"
     if ! rrm_mark_build_pending >/dev/null 2>&1; then
         release_locked_mount
         send_error 500 "Addons were saved, but RR Manager failed to mark reboot required."
@@ -719,13 +719,13 @@ save_modules_action() {
 
     csv_to_lines "${items_value}" | sort -u >"${entries_file}"
     if ! rrm_replace_yaml_map_section "modules" "${entries_file}" "${config_path}"; then
-        rm -f "${entries_file}"
+        rrm_do rm -f "${entries_file}"
         release_locked_mount
         send_error 500 "Failed to save modules into user-config.yml."
         return
     fi
 
-    rm -f "${entries_file}"
+    rrm_do rm -f "${entries_file}"
     if ! rrm_mark_build_pending >/dev/null 2>&1; then
         release_locked_mount
         send_error 500 "Modules were saved, but RR Manager failed to mark reboot required."

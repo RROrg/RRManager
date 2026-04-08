@@ -1,6 +1,6 @@
 SPK_NAME = rr-manager
 SPK_VERS = 4.0
-SPK_REV = 4
+SPK_REV = 5
 SPK_ICON = src/rr-manager.png
 
 override ARCH = noarch
