@@ -126,7 +126,7 @@
   "update.refreshLog": "ログ更新",
   "update.rrCheckRelease": "RR リリースを確認",
   "update.rrEnterLocalPath": "先にローカル更新 ZIP パスを入力してください。",
-  "update.rrLoadingRelease": "RR リリース情報を読み込み中...",
+  "update.loadingRrRelease": "RR リリース情報を読み込み中...",
   "update.rrLocalPath": "ローカル RR ZIP パス",
   "update.rrLocalPathPlaceholder": "/volume1/public/updateall-xx.zip",
   "update.rrLocalStarted": "ローカル更新を開始しました。",

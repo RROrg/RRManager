@@ -126,7 +126,7 @@
   "update.refreshLog": "Làm mới nhật ký",
   "update.rrCheckRelease": "Kiem tra ban phat hanh RR",
   "update.rrEnterLocalPath": "Vui lòng nhập đường dẫn ZIP cập nhật cục bộ trước.",
-  "update.rrLoadingRelease": "Dang tai thong tin ban phat hanh RR...",
+  "update.loadingRrRelease": "Dang tai thong tin ban phat hanh RR...",
   "update.rrLocalPath": "Duong dan RR ZIP cuc bo",
   "update.rrLocalPathPlaceholder": "/volume1/public/updateall-xx.zip",
   "update.rrLocalStarted": "Đã bắt đầu cập nhật cục bộ.",

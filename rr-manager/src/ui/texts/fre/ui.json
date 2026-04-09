@@ -126,7 +126,7 @@
   "update.refreshLog": "Actualiser le journal",
   "update.rrCheckRelease": "Verifier la version RR",
   "update.rrEnterLocalPath": "Saisissez d’abord un chemin ZIP local.",
-  "update.rrLoadingRelease": "Chargement des informations de version RR...",
+  "update.loadingRrRelease": "Chargement des informations de version RR...",
   "update.rrLocalPath": "Chemin local du ZIP RR",
   "update.rrLocalPathPlaceholder": "/volume1/public/updateall-xx.zip",
   "update.rrLocalStarted": "Mise à jour locale démarrée.",

@@ -126,7 +126,7 @@
   "update.refreshLog": "Günlüğü yenile",
   "update.rrCheckRelease": "RR Surumunu Kontrol Et",
   "update.rrEnterLocalPath": "Önce yerel güncelleme ZIP yolunu girin.",
-  "update.rrLoadingRelease": "RR surum bilgisi yukleniyor...",
+  "update.loadingRrRelease": "RR surum bilgisi yukleniyor...",
   "update.rrLocalPath": "Yerel RR ZIP Yolu",
   "update.rrLocalPathPlaceholder": "/volume1/public/updateall-xx.zip",
   "update.rrLocalStarted": "Yerel güncelleme başlatıldı.",

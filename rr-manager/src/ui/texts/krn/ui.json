@@ -126,7 +126,7 @@
   "update.refreshLog": "로그 새로 고침",
   "update.rrCheckRelease": "RR 릴리스 확인",
   "update.rrEnterLocalPath": "먼저 로컬 업데이트 ZIP 경로를 입력하세요.",
-  "update.rrLoadingRelease": "RR 릴리스 정보를 불러오는 중...",
+  "update.loadingRrRelease": "RR 릴리스 정보를 불러오는 중...",
   "update.rrLocalPath": "로컬 RR ZIP 경로",
   "update.rrLocalPathPlaceholder": "/volume1/public/updateall-xx.zip",
   "update.rrLocalStarted": "로컬 업데이트를 시작했습니다.",

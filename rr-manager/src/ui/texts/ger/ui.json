@@ -126,7 +126,7 @@
   "update.refreshLog": "Protokoll aktualisieren",
   "update.rrCheckRelease": "RR-Release pruefen",
   "update.rrEnterLocalPath": "Bitte zuerst einen lokalen Update-ZIP-Pfad eingeben.",
-  "update.rrLoadingRelease": "RR-Release-Informationen werden geladen...",
+  "update.loadingRrRelease": "RR-Release-Informationen werden geladen...",
   "update.rrLocalPath": "Lokaler RR-ZIP-Pfad",
   "update.rrLocalPathPlaceholder": "/volume1/public/updateall-xx.zip",
   "update.rrLocalStarted": "Lokales Update gestartet.",

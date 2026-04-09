@@ -126,7 +126,7 @@
   "update.refreshLog": "Refresh Log",
   "update.rrCheckRelease": "Check RR Release",
   "update.rrEnterLocalPath": "Enter a local update zip path first.",
-  "update.rrLoadingRelease": "Loading RR release information...",
+  "update.loadingRrRelease": "Loading RR release information...",
   "update.rrLocalPath": "Local RR ZIP Path",
   "update.rrLocalPathPlaceholder": "/volume1/public/updateall-xx.zip",
   "update.rrLocalStarted": "Local update started.",

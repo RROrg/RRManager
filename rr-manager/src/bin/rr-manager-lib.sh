@@ -17,10 +17,10 @@ UPDATE_PID_FILE="${UPDATE_PID_FILE:-${STATE_DIR}/update.pid}"
 MOUNT_ERROR_FILE="${MOUNT_ERROR_FILE:-${STATE_DIR}/mount.error}"
 MOUNT_ERROR_KIND_FILE="${MOUNT_ERROR_KIND_FILE:-${STATE_DIR}/mount.error.kind}"
 RRM_JOB_LOG="${RRM_JOB_LOG:-${SCRIPT_LOG_DIR}/rr-manager-job.log}"
-RELEASE_REPO_URL="${RELEASE_REPO_URL:-https://github.com/RROrg/rr}"
-RELEASE_LATEST_URL="${RELEASE_LATEST_URL:-${RELEASE_REPO_URL}/releases/latest}"
-RELEASE_TAGS_URL="${RELEASE_TAGS_URL:-${RELEASE_REPO_URL}/tags}"
-RELEASE_DOWNLOAD_BASE_URL="${RELEASE_DOWNLOAD_BASE_URL:-${RELEASE_REPO_URL}/releases/download}"
+RR_RELEASE_REPO_URL="${RR_RELEASE_REPO_URL:-https://github.com/RROrg/rr}"
+RR_RELEASE_LATEST_URL="${RR_RELEASE_LATEST_URL:-${RR_RELEASE_REPO_URL}/releases/latest}"
+RR_RELEASE_DOWNLOAD_BASE_URL="${RR_RELEASE_DOWNLOAD_BASE_URL:-${RR_RELEASE_REPO_URL}/releases/download}"
+RR_RELEASE_TAGS_URL="${RR_RELEASE_TAGS_URL:-${RR_RELEASE_REPO_URL}/tags}"
 RRM_RELEASE_REPO_URL="${RRM_RELEASE_REPO_URL:-https://github.com/RROrg/RRManager}"
 RRM_RELEASE_LATEST_URL="${RRM_RELEASE_LATEST_URL:-${RRM_RELEASE_REPO_URL}/releases/latest}"
 RRM_RELEASE_DOWNLOAD_BASE_URL="${RRM_RELEASE_DOWNLOAD_BASE_URL:-${RRM_RELEASE_REPO_URL}/releases/download}"
@@ -1310,7 +1310,7 @@ rrm_download_to() {
 }
 
 rrm_release_normalize_tag() {
-    printf '%s\n' "$1" | sed 's#/$##; s#.*/##; s/^[vV]//'
+    printf '%s\n' "$1" | sed 's#/$##; s#.*/##; s/^[vV]//; s/^latest$//'
 }
 
 rrm_fetch_latest_release_tag_from() {
@@ -1338,26 +1338,26 @@ rrm_release_published_at_from() {
 
 rrm_fetch_latest_release_tag() {
     if [ "${PRERELEASE}" = "true" ]; then
-        rrm_http_get "${RELEASE_TAGS_URL}" |
+        rrm_http_get "${RR_RELEASE_TAGS_URL}" |
             grep '/refs/tags/.*\.zip' |
             sed -E 's#.*\/refs\/tags\/(.*)\.zip.*#\1#' |
             sort -rV |
             head -n 1 |
-            sed 's/^[vV]//'
+            sed 's/^[vV]//; s/^latest$//'
         return $?
     fi
 
-    rrm_fetch_latest_release_tag_from "${RELEASE_LATEST_URL}"
+    rrm_fetch_latest_release_tag_from "${RR_RELEASE_LATEST_URL}"
 }
 
 rrm_release_html_url() {
     tag_value="$1"
-    rrm_release_html_url_from "${RELEASE_REPO_URL}" "${tag_value}"
+    rrm_release_html_url_from "${RR_RELEASE_REPO_URL}" "${tag_value}"
 }
 
 rrm_release_published_at() {
     tag_value="$1"
-    rrm_release_published_at_from "${RELEASE_REPO_URL}" "${tag_value}"
+    rrm_release_published_at_from "${RR_RELEASE_REPO_URL}" "${tag_value}"
 }
 
 rrm_release_asset_info() {
@@ -1365,7 +1365,7 @@ rrm_release_asset_info() {
     [ -n "${tag_value}" ] || return 1
 
     for asset_name in "updateall-${tag_value}.zip" "update-${tag_value}.zip"; do
-        asset_url="${RELEASE_DOWNLOAD_BASE_URL}/${tag_value}/${asset_name}"
+        asset_url="${RR_RELEASE_DOWNLOAD_BASE_URL}/${tag_value}/${asset_name}"
         if rrm_http_exists "${asset_url}"; then
             printf '%s\t%s\n' "${asset_name}" "${asset_url}"
             return 0
@@ -1373,7 +1373,7 @@ rrm_release_asset_info() {
     done
 
     asset_name="updateall-${tag_value}.zip"
-    asset_url="${RELEASE_DOWNLOAD_BASE_URL}/${tag_value}/${asset_name}"
+    asset_url="${RR_RELEASE_DOWNLOAD_BASE_URL}/${tag_value}/${asset_name}"
     printf '%s\t%s\n' "${asset_name}" "${asset_url}"
 }
 

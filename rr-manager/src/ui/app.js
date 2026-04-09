@@ -45,17 +45,17 @@
     };
     var UPDATE_VARIANTS = {
         rr: {
-            releaseAction: 'release',
-            retryKey: 'release',
-            loadingKey: 'update.rrLoadingRelease',
-            releaseBoxId: 'releaseBox',
-            checkButtonId: 'checkRelease',
-            onlineButtonId: 'startOnlineUpdate',
-            localButtonId: 'startLocalUpdate',
-            localInputId: 'localArchivePath',
+            releaseAction: 'rr-release',
+            retryKey: 'rr-release',
+            loadingKey: 'update.loadingRrRelease',
+            releaseBoxId: 'rrReleaseBox',
+            checkButtonId: 'checkRrRelease',
+            onlineButtonId: 'startRrOnlineUpdate',
+            localButtonId: 'startRrLocalUpdate',
+            localInputId: 'rrLocalArchivePath',
             localPathErrorKey: 'update.rrEnterLocalPath',
-            onlineAction: 'start-update-online',
-            localAction: 'start-update-local',
+            onlineAction: 'start-rr-update-online',
+            localAction: 'start-rr-update-local',
             onlineSuccessKey: 'update.rrOnlineStarted',
             localSuccessKey: 'update.rrLocalStarted',
             silentLogRefresh: false
@@ -1122,14 +1122,14 @@
                 if ($('checkRrmRelease')) {
                     $('checkRrmRelease').disabled = true;
                 }
-                if ($('startLocalUpdate')) {
-                    $('startLocalUpdate').disabled = true;
+                if ($('startRrLocalUpdate')) {
+                    $('startRrLocalUpdate').disabled = true;
                 }
-                if ($('startOnlineUpdate')) {
-                    $('startOnlineUpdate').disabled = true;
+                if ($('startRrOnlineUpdate')) {
+                    $('startRrOnlineUpdate').disabled = true;
                 }
-                if ($('checkRelease')) {
-                    $('checkRelease').disabled = true;
+                if ($('checkRrRelease')) {
+                    $('checkRrRelease').disabled = true;
                 }
             }
             return;

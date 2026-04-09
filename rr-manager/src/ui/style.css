@@ -868,7 +868,7 @@ body.rrm button:disabled {
 .tabs button.active,
 #saveFile,
 #startRrmOnlineUpdate,
-#startOnlineUpdate,
+#startRrOnlineUpdate,
 #saveItems {
     background: var(--brand);
     color: #fff;
@@ -877,7 +877,7 @@ body.rrm button:disabled {
 }
 
 #startRrmLocalUpdate,
-#startLocalUpdate {
+#startRrLocalUpdate {
     background: var(--accent-soft);
     color: #7d5511;
     border-color: rgba(216, 154, 53, 0.18);

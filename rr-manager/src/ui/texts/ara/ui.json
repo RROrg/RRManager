@@ -126,7 +126,7 @@
   "update.refreshLog": "تحديث السجل",
   "update.rrCheckRelease": "التحقق من إصدار RR",
   "update.rrEnterLocalPath": "أدخل أولاً مسار ملف ZIP المحلي للتحديث.",
-  "update.rrLoadingRelease": "جارٍ تحميل معلومات إصدار RR...",
+  "update.loadingRrRelease": "جارٍ تحميل معلومات إصدار RR...",
   "update.rrLocalPath": "مسار ملف RR ZIP المحلي",
   "update.rrLocalPathPlaceholder": "/volume1/public/updateall-xx.zip",
   "update.rrLocalStarted": "تم بدء التحديث المحلي.",

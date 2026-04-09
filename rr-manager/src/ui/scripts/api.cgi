@@ -746,10 +746,10 @@ case "${action}" in
     save-addons) save_addons_action ;;
     modules) modules_action ;;
     save-modules) save_modules_action ;;
-    release) rr_release_info_action ;;
+    rr-release) rr_release_info_action ;;
     rrm-release) rrm_release_info_action ;;
-    start-update-online) rr_update_online_action ;;
-    start-update-local) rr_update_local_action ;;
+    start-rr-update-online) rr_update_online_action ;;
+    start-rr-update-local) rr_update_local_action ;;
     start-rrm-update-online) rrm_update_online_action ;;
     start-rrm-update-local) rrm_update_local_action ;;
     log) log_action ;;

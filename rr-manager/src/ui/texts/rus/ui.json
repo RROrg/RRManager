@@ -126,7 +126,7 @@
   "update.refreshLog": "Обновить журнал",
   "update.rrCheckRelease": "Проверить релиз RR",
   "update.rrEnterLocalPath": "Сначала укажите путь к локальному ZIP-архиву обновления.",
-  "update.rrLoadingRelease": "Загрузка информации о релизе RR...",
+  "update.loadingRrRelease": "Загрузка информации о релизе RR...",
   "update.rrLocalPath": "Локальный путь к RR ZIP",
   "update.rrLocalPathPlaceholder": "/volume1/public/updateall-xx.zip",
   "update.rrLocalStarted": "Локальное обновление запущено.",

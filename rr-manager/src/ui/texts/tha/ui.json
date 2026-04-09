@@ -126,7 +126,7 @@
   "update.refreshLog": "รีเฟรชบันทึก",
   "update.rrCheckRelease": "ตรวจสอบรีลีส RR",
   "update.rrEnterLocalPath": "กรุณาระบุพาธไฟล์ ZIP สำหรับอัปเดตก่อน",
-  "update.rrLoadingRelease": "กำลังโหลดข้อมูลรีลีสของ RR...",
+  "update.loadingRrRelease": "กำลังโหลดข้อมูลรีลีสของ RR...",
   "update.rrLocalPath": "พาธ RR ZIP ภายในเครื่อง",
   "update.rrLocalPathPlaceholder": "/volume1/public/updateall-xx.zip",
   "update.rrLocalStarted": "เริ่มการอัปเดตจากไฟล์ภายในเครื่องแล้ว",
