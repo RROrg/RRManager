@@ -123,6 +123,7 @@
   "update.noLog": "Aún no hay salida de registro.",
   "update.overviewTitle": "Resumen de actualización",
   "update.publishedAt": "Publicado el",
+  "update.releaseLogs": "Registro de actualización",
   "update.refreshLog": "Actualizar registro",
   "update.rrCheckRelease": "Comprobar version de RR",
   "update.rrEnterLocalPath": "Introduzca primero una ruta ZIP local.",

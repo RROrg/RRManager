@@ -123,6 +123,7 @@
   "update.noLog": "Henüz günlük çıktısı yok.",
   "update.overviewTitle": "Güncelleme Özeti",
   "update.publishedAt": "Yayınlanma tarihi",
+  "update.releaseLogs": "Güncelleme Günlüğü",
   "update.refreshLog": "Günlüğü yenile",
   "update.rrCheckRelease": "RR Surumunu Kontrol Et",
   "update.rrEnterLocalPath": "Önce yerel güncelleme ZIP yolunu girin.",

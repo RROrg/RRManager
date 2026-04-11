@@ -123,6 +123,7 @@
   "update.noLog": "Chưa có nhật ký.",
   "update.overviewTitle": "Tổng quan cập nhật",
   "update.publishedAt": "Ngày phát hành",
+  "update.releaseLogs": "Cập nhật ký",
   "update.refreshLog": "Làm mới nhật ký",
   "update.rrCheckRelease": "Kiem tra ban phat hanh RR",
   "update.rrEnterLocalPath": "Vui lòng nhập đường dẫn ZIP cập nhật cục bộ trước.",

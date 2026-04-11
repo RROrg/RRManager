@@ -912,6 +912,12 @@ body.rrm button:disabled {
     word-break: break-word;
 }
 
+.releaseBox .releaseLogs .statValue {
+    white-space: pre-wrap;
+    line-height: 1.45;
+    font-weight: 500;
+}
+
 .releaseBox,
 .hint {
     color: var(--muted);

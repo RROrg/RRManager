@@ -123,6 +123,7 @@
   "update.noLog": "No log output yet.",
   "update.overviewTitle": "Update Overview",
   "update.publishedAt": "Published At",
+  "update.releaseLogs": "Release Logs",
   "update.refreshLog": "Refresh Log",
   "update.rrCheckRelease": "Check RR Release",
   "update.rrEnterLocalPath": "Enter a local update zip path first.",

@@ -123,6 +123,7 @@
   "update.noLog": "아직 로그 출력이 없습니다.",
   "update.overviewTitle": "업데이트 개요",
   "update.publishedAt": "게시일",
+  "update.releaseLogs": "업데이트 로그",
   "update.refreshLog": "로그 새로 고침",
   "update.rrCheckRelease": "RR 릴리스 확인",
   "update.rrEnterLocalPath": "먼저 로컬 업데이트 ZIP 경로를 입력하세요.",

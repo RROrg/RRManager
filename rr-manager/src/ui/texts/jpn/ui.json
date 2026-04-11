@@ -123,6 +123,7 @@
   "update.noLog": "まだログ出力はありません。",
   "update.overviewTitle": "更新概要",
   "update.publishedAt": "公開日時",
+  "update.releaseLogs": "更新ログ",
   "update.refreshLog": "ログ更新",
   "update.rrCheckRelease": "RR リリースを確認",
   "update.rrEnterLocalPath": "先にローカル更新 ZIP パスを入力してください。",

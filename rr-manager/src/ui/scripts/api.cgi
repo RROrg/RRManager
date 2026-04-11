@@ -457,6 +457,7 @@ rr_release_info_action() {
     }
 
     published_value="$(rrm_release_published_at "${tag_value}" 2>/dev/null || true)"
+    release_logs="$(rrm_release_logs "${tag_value}" 2>/dev/null || true)"
     asset_info="$(rrm_release_asset_info "${tag_value}" 2>/dev/null || true)"
     asset_name="$(printf '%s' "${asset_info}" | awk -F '\t' 'NR == 1 { print $1 }')"
     asset_url="$(printf '%s' "${asset_info}" | awk -F '\t' 'NR == 1 { print $2 }')"
@@ -475,7 +476,7 @@ rr_release_info_action() {
 
     current_version="$(rrm_current_version 2>/dev/null || true)"
     release_locked_mount
-    send_ok "{\"ok\":true,\"currentVersion\":$(json_quote "${current_version}"),\"latestVersion\":$(json_quote "${tag_value}"),\"publishedAt\":$(json_quote "${published_value}"),\"assetName\":$(json_quote "${asset_name}"),\"assetUrl\":$(json_quote "${asset_url}"),\"htmlUrl\":$(json_quote "$(rrm_release_html_url "${tag_value}")")}"
+    send_ok "{\"ok\":true,\"currentVersion\":$(json_quote "${current_version}"),\"latestVersion\":$(json_quote "${tag_value}"),\"publishedAt\":$(json_quote "${published_value}"),\"releaseLogs\":$(json_quote "${release_logs}"),\"assetName\":$(json_quote "${asset_name}"),\"assetUrl\":$(json_quote "${asset_url}"),\"htmlUrl\":$(json_quote "$(rrm_release_html_url "${tag_value}")")}"
 }
 
 rrm_release_info_action() {
@@ -486,12 +487,13 @@ rrm_release_info_action() {
     }
 
     published_value="$(rrm_rrm_release_published_at "${tag_value}" 2>/dev/null || true)"
+    release_logs="$(rrm_rrm_release_logs "${tag_value}" 2>/dev/null || true)"
     asset_info="$(rrm_rrm_release_asset_info "${tag_value}" 2>/dev/null || true)"
     asset_name="$(printf '%s' "${asset_info}" | awk -F '\t' 'NR == 1 { print $1 }')"
     asset_url="$(printf '%s' "${asset_info}" | awk -F '\t' 'NR == 1 { print $2 }')"
     current_version="$(rrm_current_package_version 2>/dev/null || true)"
 
-    send_ok "{\"ok\":true,\"currentVersion\":$(json_quote "${current_version}"),\"latestVersion\":$(json_quote "${tag_value}"),\"publishedAt\":$(json_quote "${published_value}"),\"assetName\":$(json_quote "${asset_name}"),\"assetUrl\":$(json_quote "${asset_url}"),\"htmlUrl\":$(json_quote "$(rrm_rrm_release_html_url "${tag_value}")")}"
+    send_ok "{\"ok\":true,\"currentVersion\":$(json_quote "${current_version}"),\"latestVersion\":$(json_quote "${tag_value}"),\"publishedAt\":$(json_quote "${published_value}"),\"releaseLogs\":$(json_quote "${release_logs}"),\"assetName\":$(json_quote "${asset_name}"),\"assetUrl\":$(json_quote "${asset_url}"),\"htmlUrl\":$(json_quote "$(rrm_rrm_release_html_url "${tag_value}")")}"
 }
 
 rr_update_online_action() {

@@ -453,6 +453,24 @@
         return bootKernel + ' [' + systemKernel + ']';
     }
 
+    function formatBootType(value) {
+        var normalized;
+
+        if (value == null || value === '') {
+            return t('common.unknown');
+        }
+
+        normalized = String(value).replace(/^['"]|['"]$/g, '').toLowerCase();
+        if (normalized === 'true' || normalized === 'yes' || normalized === '1') {
+            return 'DT';
+        }
+        if (normalized === 'false' || normalized === 'no' || normalized === '0') {
+            return 'Non-DT';
+        }
+
+        return String(value).replace(/^['"]|['"]$/g, '');
+    }
+
     function renderPciTable(items, emptyText) {
         if (!items || !items.length) {
             return '<tr><td colspan="5" class="emptyCell">' + escapeHtml(emptyText || t('hardware.pciEmpty')) + '</td></tr>';
@@ -1176,7 +1194,7 @@
                 [t('overview.bootKernel'), formatBootKernel(boot, hardware)],
                 [t('overview.bootLkm'), boot.lkm || t('common.unknown')],
                 [t('overview.bootMev'), boot.mev || t('common.unknown')],
-                [t('overview.diskType'), boot.bootType || t('common.unknown')]
+                [t('overview.diskType'), formatBootType(boot.bootType)]
             ]);
         }
 
@@ -1228,6 +1246,7 @@
 
     function renderReleaseBox(elementId, data) {
         var target = $(elementId);
+        var releaseLogs = data && data.releaseLogs ? String(data.releaseLogs) : '';
 
         if (!target) {
             return;
@@ -1237,6 +1256,7 @@
             '<div class="stat"><span class="statLabel">' + escapeHtml(t('update.currentVersionRelease')) + '</span><span class="statValue">' + escapeHtml(displayValue(data.currentVersion)) + '</span></div>' +
             '<div class="stat"><span class="statLabel">' + escapeHtml(t('update.latestVersionRelease')) + '</span><span class="statValue">' + escapeHtml(displayValue(data.latestVersion)) + '</span></div>' +
             '<div class="stat"><span class="statLabel">' + escapeHtml(t('update.publishedAt')) + '</span><span class="statValue">' + escapeHtml(displayValue(data.publishedAt)) + '</span></div>' +
+            '<div class="stat releaseLogs"><span class="statLabel">' + escapeHtml(t('update.releaseLogs')) + '</span><span class="statValue">' + escapeHtml(displayValue(releaseLogs)).replace(/\r\n|\r|\n/g, '<br>') + '</span></div>' +
             '<div class="stat"><span class="statLabel">' + escapeHtml(t('update.asset')) + '</span><span class="statValue">' + escapeHtml(data.assetName || t('update.noAsset')) + '</span></div>' +
             '<div class="stat hint"><span class="statLabel">' + escapeHtml(t('update.github')) + '</span><span class="statValue"><a href="' + escapeHtml(data.htmlUrl || '#') + '" target="_blank" rel="noreferrer">' + escapeHtml(data.htmlUrl || '') + '</a></span></div>';
     }

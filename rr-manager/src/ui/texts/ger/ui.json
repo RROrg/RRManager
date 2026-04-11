@@ -123,6 +123,7 @@
   "update.noLog": "Noch keine Protokollausgabe.",
   "update.overviewTitle": "Update-Übersicht",
   "update.publishedAt": "Veröffentlicht am",
+  "update.releaseLogs": "Update-Protokoll",
   "update.refreshLog": "Protokoll aktualisieren",
   "update.rrCheckRelease": "RR-Release pruefen",
   "update.rrEnterLocalPath": "Bitte zuerst einen lokalen Update-ZIP-Pfad eingeben.",

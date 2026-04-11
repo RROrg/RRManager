@@ -123,6 +123,7 @@
   "update.noLog": "Aucune sortie de journal pour le moment.",
   "update.overviewTitle": "Vue d’ensemble des mises à jour",
   "update.publishedAt": "Publié le",
+  "update.releaseLogs": "Journal de mise à jour",
   "update.refreshLog": "Actualiser le journal",
   "update.rrCheckRelease": "Verifier la version RR",
   "update.rrEnterLocalPath": "Saisissez d’abord un chemin ZIP local.",

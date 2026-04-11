@@ -123,6 +123,7 @@
   "update.noLog": "Журнал пока пуст.",
   "update.overviewTitle": "Обзор обновления",
   "update.publishedAt": "Дата публикации",
+  "update.releaseLogs": "Журнал обновления",
   "update.refreshLog": "Обновить журнал",
   "update.rrCheckRelease": "Проверить релиз RR",
   "update.rrEnterLocalPath": "Сначала укажите путь к локальному ZIP-архиву обновления.",

@@ -123,6 +123,7 @@
   "update.noLog": "暂无日志输出。",
   "update.overviewTitle": "更新概览",
   "update.publishedAt": "发布时间",
+  "update.releaseLogs": "发布信息",
   "update.refreshLog": "刷新日志",
   "update.rrCheckRelease": "检查 RR 版本",
   "update.rrEnterLocalPath": "请先输入本地更新 ZIP 路径。",

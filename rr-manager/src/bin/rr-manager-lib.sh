@@ -122,6 +122,39 @@ rrm_default_mount_point() {
     printf '%s/p%s\n' "${MOUNT_BASE}" "$1"
 }
 
+rrm_prepare_mount_point() {
+    mount_point="$1"
+    mount_parent="$(dirname "${mount_point}")"
+
+    if [ -e "${mount_parent}" ] && [ ! -d "${mount_parent}" ]; then
+        printf '%s\n' "Mount base ${mount_parent} exists but is not a directory."
+        return 1
+    fi
+
+    rrm_do mkdir -p "${mount_parent}" >/dev/null 2>&1 || {
+        printf '%s\n' "Unable to create mount base ${mount_parent}."
+        return 1
+    }
+
+    if [ -d "${mount_point}" ]; then
+        return 0
+    fi
+
+    if [ -e "${mount_point}" ] || [ -L "${mount_point}" ]; then
+        rrm_do rm -rf "${mount_point}" >/dev/null 2>&1 || {
+            printf '%s\n' "Mount point ${mount_point} exists but could not be removed."
+            return 1
+        }
+    fi
+
+    rrm_do mkdir -p "${mount_point}" >/dev/null 2>&1 || {
+        printf '%s\n' "Unable to create mount point ${mount_point}."
+        return 1
+    }
+
+    return 0
+}
+
 rrm_device_mount_point() {
     awk -v device="$1" '$1 == device { print $2; exit }' /proc/mounts
 }
@@ -294,17 +327,21 @@ rrm_partition_label() {
 rrm_validate_rr_boot_labels() {
     labels_summary=''
     mismatch=0
+    unreadable=0
 
     for partition in 1 2 3; do
         device="/dev/synoboot${partition}"
         expected_label="RR${partition}"
         actual_label="$(rrm_partition_label "${device}" 2>/dev/null || true)"
 
-        [ -n "${actual_label}" ] || actual_label='(missing)'
+        if [ -z "${actual_label}" ]; then
+            actual_label='(missing)'
+            unreadable=$((unreadable + 1))
+        fi
         [ -z "${labels_summary}" ] || labels_summary="${labels_summary}, "
         labels_summary="${labels_summary}${device}=${actual_label}"
 
-        if [ "${actual_label}" != "${expected_label}" ]; then
+        if [ "${actual_label}" != "${expected_label}" ] && [ "${actual_label}" != '(missing)' ]; then
             mismatch=1
         fi
     done
@@ -314,7 +351,25 @@ rrm_validate_rr_boot_labels() {
         return 1
     fi
 
+    if [ "${unreadable}" -ne 0 ]; then
+        return 2
+    fi
+
     return 0
+}
+
+rrm_validate_rr_boot_contents() {
+    rr_version_file="$(rrm_partition_path 1 RR_VERSION 2>/dev/null || true)"
+    user_config_file="$(rrm_partition_path 1 user-config.yml 2>/dev/null || true)"
+    modules_dir="$(rrm_partition_path 3 modules 2>/dev/null || true)"
+    addons_dir="$(rrm_partition_path 3 addons 2>/dev/null || true)"
+
+    if [ -f "${rr_version_file}" ] || [ -f "${user_config_file}" ] || [ -d "${modules_dir}" ] || [ -d "${addons_dir}" ]; then
+        return 0
+    fi
+
+    rrm_set_mount_error "Current environment is not an RR bootloader. Unsupported. Boot labels could not be read and no RR markers were found after mounting /dev/synoboot1-3." "unsupported"
+    return 1
 }
 
 rrm_mount_partition() {
@@ -327,8 +382,10 @@ rrm_mount_partition() {
         rrm_set_mount_error "Boot partition device ${device} was not found."
         return 1
     }
-    rrm_do mkdir -p "${mount_point}" || {
-        rrm_set_mount_error "Unable to create mount point ${mount_point}."
+    prepare_error="$(rrm_prepare_mount_point "${mount_point}" 2>/dev/null || true)"
+    [ -d "${mount_point}" ] || {
+        [ -n "${prepare_error}" ] || prepare_error="Unable to create mount point ${mount_point}."
+        rrm_set_mount_error "${prepare_error}"
         return 1
     }
 
@@ -384,7 +441,11 @@ rrm_mount_synoboot() {
         return 1
     }
 
-    rrm_validate_rr_boot_labels || return 1
+    label_check_status=0
+    rrm_validate_rr_boot_labels || label_check_status=$?
+    if [ "${label_check_status}" -eq 1 ]; then
+        return 1
+    fi
 
     rrm_mount_partition 1 vfat || {
         rrm_cleanup_mounts
@@ -411,6 +472,13 @@ rrm_mount_synoboot() {
         rrm_set_mount_error "Boot partition /dev/synoboot3 is still not mounted after mount attempt."
         return 1
     }
+
+    if [ "${label_check_status}" -ne 0 ]; then
+        rrm_validate_rr_boot_contents || {
+            rrm_cleanup_mounts
+            return 1
+        }
+    fi
 
     rrm_clear_mount_error
     return 0
@@ -807,7 +875,7 @@ rrm_yaml_scalar_value() {
                 exit
             }
         }
-    ' "${target_file}" | sed -n '1p'
+    ' "${target_file}" | sed -n "1{s/^'//;s/'$//;s/\r$//;p;}"
 }
 
 rrm_yaml_map_has_key() {
@@ -1320,6 +1388,20 @@ rrm_fetch_latest_release_tag_from() {
     rrm_release_normalize_tag "${resolved_url}"
 }
 
+rrm_release_logs_from() {
+    repo_url="$1"
+    tag_value="$2"
+    [ -n "${tag_value}" ] || return 1
+    rrm_http_get "$(rrm_release_html_url_from "${repo_url}" "${tag_value}")" 2>/dev/null |
+        sed -n '/data-test-selector="body-content"/,/<div data-view-component="true" class="Box-footer">/p' |
+        sed '1d;$d' |
+        sed 's#<br */*>#\n#g; s#</p>#\n#g; s#</li>#\n#g; s#</ol>#\n#g; s#</ul>#\n#g; s#</h[1-6]>#\n#g; s#<li[^>]*>#- #g' |
+        sed 's#<[^>]*>##g' |
+        sed 's/&nbsp;/ /g; s/&quot;/"/g; s/&#39;/'"'"'/g; s/&lt;/</g; s/&gt;/>/g; s/&amp;/\&/g' |
+        sed '/^[[:space:]]*$/N;/^\n$/D' |
+        sed 's/[[:space:]]*$//'
+}
+
 rrm_release_html_url_from() {
     repo_url="$1"
     tag_value="$2"
@@ -1360,6 +1442,11 @@ rrm_release_published_at() {
     rrm_release_published_at_from "${RR_RELEASE_REPO_URL}" "${tag_value}"
 }
 
+rrm_release_logs() {
+    tag_value="$1"
+    rrm_release_logs_from "${RR_RELEASE_REPO_URL}" "${tag_value}"
+}
+
 rrm_release_asset_info() {
     tag_value="$1"
     [ -n "${tag_value}" ] || return 1
@@ -1389,6 +1476,11 @@ rrm_rrm_release_html_url() {
 rrm_rrm_release_published_at() {
     tag_value="$1"
     rrm_release_published_at_from "${RRM_RELEASE_REPO_URL}" "${tag_value}"
+}
+
+rrm_rrm_release_logs() {
+    tag_value="$1"
+    rrm_release_logs_from "${RRM_RELEASE_REPO_URL}" "${tag_value}"
 }
 
 rrm_rrm_release_asset_info() {

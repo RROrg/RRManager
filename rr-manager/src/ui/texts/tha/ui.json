@@ -123,6 +123,7 @@
   "update.noLog": "ยังไม่มีบันทึก",
   "update.overviewTitle": "ภาพรวมการอัปเดต",
   "update.publishedAt": "เผยแพร่เมื่อ",
+  "update.releaseLogs": "บันทึกการอัปเดต",
   "update.refreshLog": "รีเฟรชบันทึก",
   "update.rrCheckRelease": "ตรวจสอบรีลีส RR",
   "update.rrEnterLocalPath": "กรุณาระบุพาธไฟล์ ZIP สำหรับอัปเดตก่อน",
